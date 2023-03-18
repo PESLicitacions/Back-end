@@ -55,8 +55,6 @@ git checkout -b <branch_name>
 ```
 # Como convertir la rama local a remota
 ```
-git checkout -b <branch_name>
-```
 git push develop <local_branch>
 ```
 
