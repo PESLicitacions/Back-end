@@ -1,0 +1,15 @@
+# Verion of docker-compose to use 
+version: "3.2"
+
+services:
+  app:
+    build: . #Sets the directory for docker-compose to build.
+    volumes: 
+      - .:/adjudicat
+
+    ports:
+      - "8080:8080"
+      
+    image: app:adjudicat
+    container_name: adjudicat_backend
+    command: python manage.py runserver 0.0.0.0:8080 
