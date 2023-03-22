@@ -15,7 +15,6 @@ RUN pip install --upgrade pip
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 COPY . .
-RUN python3 manage.py collectstatic
 
 EXPOSE 8080
 CMD ["gunicorn","--bind", ":8080", "adjudiCat.wsgi:application"]

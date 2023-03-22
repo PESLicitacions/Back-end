@@ -20,4 +20,4 @@ urlpatterns = [
     #django URLS
     path('admin/', admin.site.urls),
     path('', include('licitacions.urls'))
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
