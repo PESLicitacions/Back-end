@@ -6,7 +6,7 @@ class Licitacio(models.Model):
     fase_publicacio = models.CharField(max_length=80)
     denominacio = models.TextField()
     objecte_contracte = models.TextField()
-    pressupost = models.DecimalField(decimal_places=2, max_digits=9)
+    pressupost = models.DecimalField(decimal_places=2, max_digits=9, null=True)
     valor_estimat_contracte = models.DecimalField(decimal_places=2, max_digits=9)
     duracio_contracte = models.CharField(max_length=80)
     termini_presentacio_ofertes = models.DateTimeField()

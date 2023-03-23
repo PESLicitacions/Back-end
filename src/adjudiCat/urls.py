@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from publicdata.views import get_data
 
 urlpatterns = [
     #django URLS
     path('admin/', admin.site.urls),
-    path('', include('licitacions.urls'))
+    path('', include('licitacions.urls')),
+    path('get/', get_data, name='getData')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

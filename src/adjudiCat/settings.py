@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=wkk#zrk*t0x(8h-u$$b=vc2ip2q2dli$kq7!2zz=y4fm8(#xa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0','nattech.fib.upc.edu',]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     #apps
     
     'licitacions',
+    'publicdata',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'adjudiCat.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
