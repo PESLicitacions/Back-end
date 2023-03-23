@@ -9,6 +9,7 @@ router.register('api/localitzacions', api.LocalitzacioViewSet, 'localitzacions')
 router.register('api/ambit', api.AmbitViewSet, 'ambits')
 router.register('api/departament', api.DepartamentViewSet, 'departaments')
 router.register('api/organ', api.OrganViewSet, 'organs')
+router.register('api/tipus_contracte', api.TipusContracteViewSet, 'tipus_contracte')
 router.register('api/location_barcelona', api.BarcelonaViewSet, 'barna')
 
 

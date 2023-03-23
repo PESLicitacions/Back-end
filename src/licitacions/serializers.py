@@ -13,6 +13,11 @@ class LicitacioPrivadaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TipusContracteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TipusContracte
+        fields = '__all__'
+
 class LocalitzacioSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Localitzacio

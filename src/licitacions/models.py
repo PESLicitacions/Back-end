@@ -24,6 +24,14 @@ class Organ(models.Model):
     nom = models.CharField(max_length=100, verbose_name="nom organ")
 
 
+class TipusContracte(models.Model):
+    tipus_contracte = models.CharField(max_length=50)
+    subtipus_contracte = models.CharField(max_length=250)
+
+    class Meta:
+        unique_together = ('tipus_contracte', 'subtipus_contracte')
+
+
 class LicitacioPublica(models.Model):
     procediment = models.CharField(max_length=150, choices=choices.procediments)
     fase_publicacio = models.CharField(max_length=80, choices=choices.fase_publicacio)

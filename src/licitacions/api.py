@@ -15,6 +15,12 @@ class LicitacioPrivadaViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.LicitacioPrivadaSerializer
 
 
+class TipusContracteViewSet(viewsets.ModelViewSet):
+    queryset = models.TipusContracte.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = serializers.TipusContracteSerializer
+
+
 class LocalitzacioViewSet(viewsets.ModelViewSet):
     queryset = models.Localitzacio.objects.all()
     permission_classes = [permissions.AllowAny]
