@@ -57,4 +57,7 @@ git checkout -b <branch_name>
 ```
 git push develop <local_branch>
 ```
-
+#Crear Django App
+```
+python manage.py startapp app_name
+```
