@@ -8,8 +8,8 @@ import json
 
 
 def get_data(request):
-    PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit, codi_departament_ens, nom_departament_ens, codi_organ, nom_organ'
-    num_rows = '20'
+    PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit, codi_departament_ens, nom_departament_ens, codi_organ, nom_organ, tipus_contracte, subtipus_contracte'
+    num_rows = '212384'
     base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
     response_API = requests.get(base_url)
     data = response_API.text
@@ -99,8 +99,9 @@ def get_data(request):
             departament = get_departament(licitacio.get('nom_departament_ens'), licitacio.get('codi_departament_ens'))
     
             organ = get_organ(licitacio.get('nom_organ'), licitacio.get('codi_organ'))
-            
-            tipus_contracte = None
+
+            tipus_contracte = get_tipus_contracte(licitacio.get('tipus_contracte'), licitacio.get('subtipus_contracte'))
+
             object, exists = LicitacioPublica.objects.get_or_create(procediment = procediment,
                             fase_publicacio = fase_publicacio,
                             denominacio = denominacio,
@@ -169,6 +170,19 @@ def get_organ(nom, codi):
         return obj
     except Organ.DoesNotExist:
         obj = Organ(codi = codi, nom = nom)
+        obj.save()
+        return obj
+
+def get_tipus_contracte(tipus_contracte, subtipus_contracte):
+    if(tipus_contracte is None):
+        tipus_contracte = 'No existent'
+    if(subtipus_contracte is None):
+        subtipus_contracte = 'No existent'
+    try:
+        obj = TipusContracte.objects.get(tipus_contracte = tipus_contracte, subtipus_contracte = subtipus_contracte)
+        return obj
+    except TipusContracte.DoesNotExist:
+        obj = TipusContracte(tipus_contracte = tipus_contracte, subtipus_contracte = subtipus_contracte)
         obj.save()
         return obj
     
