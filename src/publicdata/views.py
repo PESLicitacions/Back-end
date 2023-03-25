@@ -9,12 +9,12 @@ import json
 
 def get_data(request):
     PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit, codi_departament_ens, nom_departament_ens, codi_organ, nom_organ, tipus_contracte, subtipus_contracte'
-    num_rows = '212384'
+    num_rows = '100'
     base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
     response_API = requests.get(base_url)
     data = response_API.text
-    print(data)
     parse_json = json.loads(data)
+    print('Hay ' + str(len(parse_json)) + 'filas')
 
 
     with transaction.atomic():
