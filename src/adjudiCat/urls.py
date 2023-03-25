@@ -24,5 +24,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('licitacions.urls')),
     path('get/', get_data, name='getData'),
-    path('insertData/', import_data_to_DB, name='getData')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

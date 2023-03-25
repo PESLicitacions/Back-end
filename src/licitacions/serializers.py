@@ -1,10 +1,42 @@
 from rest_framework import serializers
-from .models import Licitacio
+from licitacions import models
 
-class LicitacioSerializer(serializers.ModelSerializer):
+class LicitacioPublicaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Licitacio
-        fields = ('id', 'fase_publicacio', 'denominacio', 'objecte_contracte', 'pressupost', 'valor_estimat_contracte',
-                  'valor_estimat_contracte', 'duracio_contracte', 'termini_presentacio_ofertes', 'data_publicacio_anunci',
-                  'data_publicacio_adjudicacio', 'codi_cpv', 'import_adjudicacio_sense_iva', 'import_adjudicacio_amb_iva',
-                  'ofertes_rebudes', 'resultat', 'data_adjudicacio_contracte', 'data_formalitzacio_contracte')
+        model = models.LicitacioPublica
+        fields = '__all__'
+
+
+class LicitacioPrivadaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.LicitacioPrivada
+        fields = '__all__'
+
+
+class TipusContracteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TipusContracte
+        fields = '__all__'
+
+class LocalitzacioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Localitzacio
+        fields = '__all__'
+
+
+class AmbitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Ambit
+        fields = '__all__'
+
+
+class DepartamentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Departament
+        fields = '__all__'
+
+
+class OrganSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Organ
+        fields = '__all__'
