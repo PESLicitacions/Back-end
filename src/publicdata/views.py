@@ -8,7 +8,7 @@ import json
 
 
 def get_data(request):
-    PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio'
+    PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit'
     num_rows = '20'
     base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
     response_API = requests.get(base_url)
@@ -91,11 +91,11 @@ def get_data(request):
                 data_formalitzacio_contracte = str(resultsplit[0])
 
             enllaç = licitacio.get('enllac_publicacio')
+
             lloc_execucio = get_lloc_execucio(licitacio.get('lloc_execucio'))
-            print('VOY A PRINTAR')
-            print(licitacio.get('lloc_execucio'))
-            print('HE PRINTADO')
-            ambit = None
+
+            ambit = get_ambit(licitacio.get('nom_ambit'), licitacio.get('codi_ambit'))
+
             departament = None
             organ = None
             tipus_contracte = None
@@ -140,5 +140,14 @@ def get_lloc_execucio(lloc_execucio):
         return obj
     except Localitzacio.DoesNotExist:
         obj = Localitzacio(nom=lloc_execucio, longitud=Decimal(0.19), latitud=Decimal(0.1))
+        obj.save()
+        return obj
+
+def get_ambit(nom, codi):
+    try:
+        obj = Ambit.objects.get(codi = codi, nom = nom)
+        return obj
+    except Ambit.DoesNotExist:
+        obj = Ambit(codi = codi, nom = nom)
         obj.save()
         return obj
