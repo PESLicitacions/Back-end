@@ -7,7 +7,7 @@ class Licitacio(models.Model):
     denominacio = models.TextField()
     objecte_contracte = models.TextField()
     pressupost = models.DecimalField(decimal_places=2, max_digits=9, null=True)
-    valor_estimat_contracte = models.DecimalField(decimal_places=2, max_digits=9)
+    valor_estimat_contracte = models.DecimalField(decimal_places=2, max_digits=9, null=True)
     duracio_contracte = models.CharField(max_length=80)
     termini_presentacio_ofertes = models.DateTimeField()
     data_publicacio_anunci = models.DateTimeField()
