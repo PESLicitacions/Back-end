@@ -2,62 +2,104 @@ from django.shortcuts import render
 from django.db import transaction
 from django.http import JsonResponse
 from licitacions.models import Localitzacio, Ambit, Departament, Organ, TipusContracte, LicitacioPublica, LicitacioPrivada
+from decimal import Decimal, getcontext
 import requests
 import json
 
 
 def get_data(request):
     PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio'
-    num_rows = '10'
+    num_rows = '20'
     base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
     response_API = requests.get(base_url)
     data = response_API.text
+    print(data)
     parse_json = json.loads(data)
+
+
     with transaction.atomic():
         for licitacio in parse_json:
             procediment = licitacio.get('procediment')
             fase_publicacio = licitacio.get('fase_publicacio')
             denominacio = licitacio.get('denominacio')
             objecte_contracte = licitacio.get('objecte_contracte')
+
             pressupost_licitacio = licitacio.get('pressupost_licitacio')
+            if(pressupost_licitacio is None):
+                pressupost_licitacio = 0.00
+            else: 
+                pressupost_licitacio = Decimal(pressupost_licitacio)
+
             valor_estimat_contracte = licitacio.get('valor_estimat_contracte')
+            if(valor_estimat_contracte is None):
+                valor_estimat_contracte = 0.00
+            else: 
+                valor_estimat_contracte = Decimal(valor_estimat_contracte)
+
+                
             duracio_contracte = licitacio.get('duracio_contracte')
+
             termini_presentacio_ofertes = licitacio.get('termini_presentacio_ofertes')
+            if(termini_presentacio_ofertes is not None):
+                resultsplit = termini_presentacio_ofertes.split('T')
+                termini_presentacio_ofertes = str(resultsplit[0])
 
             data_publicacio_anunci = licitacio.get('data_publicacio_anunci')
-            if(data_publicacio_anunci != None):
+            if(data_publicacio_anunci is not None):
                 resultsplit = data_publicacio_anunci.split('T')
                 data_publicacio_anunci = str(resultsplit[0])
 
             data_publicacio_adjudicacio = licitacio.get('data_publicacio_adjudicacio')
-            if(data_publicacio_adjudicacio != None):           
+            if(data_publicacio_adjudicacio is not None):           
                 resultsplit = data_publicacio_adjudicacio.split('T')
                 data_publicacio_adjudicacio = str(resultsplit[0])
 
             codi_cpv = licitacio.get('codi_cpv')
+            if(codi_cpv is not None):
+                codi_cpv = int(codi_cpv)
+
             import_adjudicacio_sense_iva = licitacio.get('import_adjudicacio_sense')
+            if(import_adjudicacio_sense_iva is None):
+                import_adjudicacio_sense_iva = 0.00
+            else:
+                import_adjudicacio_sense_iva = Decimal(import_adjudicacio_sense_iva)
+
+            
             import_adjudicacio_amb_iva = licitacio.get('import_adjudicacio_amb_iva')
+            if(import_adjudicacio_amb_iva is None):
+                import_adjudicacio_amb_iva = 0.00
+            else:
+                import_adjudicacio_amb_iva = Decimal(import_adjudicacio_amb_iva)
+
+            
+
             ofertes_rebudes = licitacio.get('ofertes_rebudes')
+            if(ofertes_rebudes is not None):
+                ofertes_rebudes = int(ofertes_rebudes)
+
             resultat = licitacio.get('resultat')
 
             data_adjudicacio_contracte = licitacio.get('data_adjudicacio_contracte')
-            if(data_adjudicacio_contracte != None):
+            if(data_adjudicacio_contracte is not None):
                 resultsplit = data_adjudicacio_contracte.split('T')
                 data_adjudicacio_contracte = str(resultsplit[0])
 
             
             data_formalitzacio_contracte = licitacio.get('data_formalitzacio_contracte')
-            if(data_formalitzacio_contracte != None):
+            if(data_formalitzacio_contracte is not None):
                 resultsplit = data_formalitzacio_contracte.split('T')
                 data_formalitzacio_contracte = str(resultsplit[0])
 
             enllaç = licitacio.get('enllac_publicacio')
-            lloc_execucio = None
+            lloc_execucio = get_lloc_execucio(licitacio.get('lloc_execucio'))
+            print('VOY A PRINTAR')
+            print(licitacio.get('lloc_execucio'))
+            print('HE PRINTADO')
             ambit = None
             departament = None
             organ = None
             tipus_contracte = None
-            l = LicitacioPublica.objects.create(procediment = procediment,
+            object, exists = LicitacioPublica.objects.get_or_create(procediment = procediment,
                             fase_publicacio = fase_publicacio,
                             denominacio = denominacio,
                             objecte_contracte = objecte_contracte,
@@ -82,6 +124,21 @@ def get_data(request):
                             tipus_contracte = tipus_contracte
                             )
             
+            if(exists):
+                print('ya existe')
+
     return JsonResponse(data, safe=False)
 
- 
+def delete_all_licitacions_publicas(request):
+    LicitacioPublica.objects.all().delete()
+    return render(request, 'ok.html')
+
+
+def get_lloc_execucio(lloc_execucio):
+    try:
+        obj = Localitzacio.objects.get(nom=lloc_execucio)
+        return obj
+    except Localitzacio.DoesNotExist:
+        obj = Localitzacio(nom=lloc_execucio, longitud=Decimal(0.19), latitud=Decimal(0.1))
+        obj.save()
+        return obj
