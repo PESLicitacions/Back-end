@@ -43,8 +43,7 @@ INSTALLED_APPS = [
     #django rest API apps
     'rest_framework',
     
-    #apps
-    
+    #apps    
     'licitacions',
 ]
 
