@@ -8,20 +8,32 @@ class Localitzacio(models.Model):
     longitud = models.DecimalField(max_digits=22, decimal_places=16)
     latitud = models.DecimalField(max_digits=22, decimal_places=16)
 
+    def __str__(self):
+        return self.nom
+
 
 class Ambit(models.Model):
     codi = models.IntegerField(primary_key=True)
     nom = models.CharField(max_length=100, verbose_name="nom àmbit")
+
+    def __str__(self):
+        return self.nom
 
 
 class Departament(models.Model):
     codi = models.IntegerField(primary_key=True)
     nom = models.CharField(max_length=100, verbose_name="nom departament")
 
+    def __str__(self):
+        return self.nom
+
 
 class Organ(models.Model):
     codi = models.IntegerField(primary_key=True)
     nom = models.CharField(max_length=100, verbose_name="nom organ")
+
+    def __str__(self):
+        return self.nom
 
 
 class TipusContracte(models.Model):
@@ -30,6 +42,9 @@ class TipusContracte(models.Model):
 
     class Meta:
         unique_together = ('tipus_contracte', 'subtipus_contracte')
+
+    def __str__(self):
+        return self.tipus_contracte + ': ' + self.subtipus_contracte
 
 
 class LicitacioPublica(models.Model):
@@ -51,8 +66,11 @@ class LicitacioPublica(models.Model):
     data_adjudicacio_contracte = models.DateField()
     data_formalitzacio_contracte = models.DateField()
     enllaç = models.URLField()
-    lloc_execucio = models.ForeignKey(Localitzacio, to_field='nom' , related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
-
+    lloc_execucio = models.ForeignKey(Localitzacio, to_field='nom', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
+    ambit = models.ForeignKey(Ambit, to_field='codi', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
+    departament = models.ForeignKey(Departament, to_field='codi', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
+    organ = models.ForeignKey(Organ, to_field='codi', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
+    tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
 
 class LicitacioPrivada(models.Model):
     procediment = models.CharField(max_length=150, choices=choices.procediments)
@@ -73,5 +91,6 @@ class LicitacioPrivada(models.Model):
     data_adjudicacio_contracte = models.DateField()
     data_formalitzacio_contracte = models.DateField()
     lloc_execucio = models.ForeignKey(Localitzacio, related_name="licitacio_privada", null=True, on_delete=models.SET_NULL)
+    tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="licitacio_privada", null=True, on_delete=models.SET_NULL)
 
 
