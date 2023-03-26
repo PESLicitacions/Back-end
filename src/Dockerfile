@@ -11,11 +11,14 @@ RUN apt-get update && \
     apt-get clean
 
 RUN mkdir static
+
 RUN pip install --upgrade pip
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+
 COPY . .
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8080
+
 CMD ["gunicorn","--bind", ":8080", "adjudiCat.wsgi:application"]
-#CMD ["python3", "manage.py", "runserver", "0.0.0.0:8080"]
