@@ -5,6 +5,8 @@ from licitacions.models import Localitzacio, Ambit, Departament, Organ, TipusCon
 from decimal import Decimal, getcontext
 import requests
 import json
+import csv
+import datetime
 
 
 def get_data(request):
@@ -102,7 +104,7 @@ def get_data(request):
 
             tipus_contracte = get_tipus_contracte(licitacio.get('tipus_contracte'), licitacio.get('subtipus_contracte'))
 
-            object, exists = LicitacioPublica.objects.get_or_create(procediment = procediment,
+            LicitacioPublica.objects.create(procediment = procediment,
                             fase_publicacio = fase_publicacio,
                             denominacio = denominacio,
                             objecte_contracte = objecte_contracte,
@@ -127,10 +129,46 @@ def get_data(request):
                             tipus_contracte = tipus_contracte
                             )
             
-            if(exists):
-                print('ya existe')
+           # if(exists):
+                #print('ya existe')
 
     return JsonResponse(data, safe=False)
+
+def create_db_from_csv(request):
+    with open('/home/santi/Downloads/Contractaci__p_blica_a_Catalunya__licitacions_i_adjudicacions_en_curs.csv') as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            data_publicacio_anunci = datetime.datetime.strptime(row[25], '%d/%m/%Y %I:%M:%S %p')
+            data_publicacio_adjudicacio = datetime.datetime.strptime(row[26], '%d/%m/%Y %I:%M:%S %p')
+            data_adjudicacio_contracte = datetime.datetime.strptime(row[41], '%d/%m/%Y %I:%M:%S %p')
+            data_formalitzacio_contracte = datetime.datetime.strptime(row[42], '%d/%m/%Y %I:%M:%S %p')
+            LicitacioPublica.objects.create(
+                procediment = row[13],
+                fase_publicacio = row[14],
+                denominacio = row[15],
+                objecte_contracte = row[16],
+                pressupost = row[17],
+                valor_estimat_contracte = row[18],
+                duracio_contracte = row[21],
+                termini_presentacio_ofertes = row[22],
+                data_publicacio_anunci = data_publicacio_anunci,
+                data_publicacio_adjudicacio = data_publicacio_adjudicacio,
+                codi_cpv = row[31],
+                import_adjudicacio_sense_iva = row[35],
+                import_adjudicacio_amb_iva = row[36],
+                ofertes_rebudes = row[37],
+                resultat = row[38],
+                data_adjudicacio_contracte = data_adjudicacio_contracte,
+                data_formalitzacio_contracte = data_formalitzacio_contracte,
+                enllaç = row[39],
+                lloc_execucio = get_lloc_execucio(row[20]),
+                ambit = get_ambit(row[1], row[0]), 
+                departament = get_departament(row[3], row[2]), 
+                organ = get_organ(row[5], row[4]),
+                tipus_contracte = get_tipus_contracte(row[11], row[12])
+                ) 
+
 
 def delete_all_licitacions_publicas(request):
     LicitacioPublica.objects.all().delete()

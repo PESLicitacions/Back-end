@@ -48,6 +48,7 @@ class TipusContracte(models.Model):
 
 
 class LicitacioPublica(models.Model):
+    id = models.BigAutoField(primary_key=True)
     procediment = models.CharField(max_length=150, choices=choices.procediments, null=True)
     fase_publicacio = models.CharField(max_length=80, choices=choices.fase_publicacio, null=True)
     denominacio = models.TextField(null=True)
