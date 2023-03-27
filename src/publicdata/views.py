@@ -136,49 +136,89 @@ def get_data(request):
 
 def create_db_from_csv(request):
     with open('/home/santi/Downloads/Contractaci__p_blica_a_Catalunya__licitacions_i_adjudicacions_en_curs.csv') as f:
-        time_format = '%d/%m/%Y %I:%M:%S %p'
         
         reader = csv.reader(f)
         next(reader)
         for row in reader:
 
             #Modificamos todas las fechas al formato correcto de DateTime 
-
-            data_publicacio_anunci = row[25]
+            print('/////////////////////////////////////////////////////////////////////////////////////////////')
+            data_publicacio_anunci = None
             if(row[25] != ''):
-                data_publicacio_anunci = datetime.strptime(data_publicacio_anunci, '%d/%m/%Y %I:%M:%S %p')
-                data_publicacio_anunci = data_publicacio_anunci.strftime('%Y-%m-%d %H:%M:%S')
+                print(len(row[25]))
+                if(len(row[25]) > 10):
+                    data_publicacio_anunci = datetime.strptime(row[25], '%d/%m/%Y %I:%M:%S %p')
+                    data_publicacio_anunci = data_publicacio_anunci.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    data_publicacio_anunci = datetime.strptime(row[25], '%d/%m/%Y')
+                    data_publicacio_anunci = datetime.combine(data_publicacio_anunci.date(), datetime.min.time())
             else:
                 data_publicacio_anunci = None
             
+            print('data_publicacio_anunci: ' )
+            print(data_publicacio_anunci)
 
-            data_publicacio_adjudicacio = row[26]
+            data_publicacio_adjudicacio = None
+            print(len(row[26]))
             if(row[26] != ''):
-                data_publicacio_adjudicacio = datetime.strptime(data_publicacio_adjudicacio, '%d/%m/%Y %I:%M:%S %p')
-                data_publicacio_adjudicacio = data_publicacio_adjudicacio.strftime('%Y-%m-%d %H:%M:%S')
+                if(len(row[26]) > 10):
+                    data_publicacio_adjudicacio = datetime.strptime(row[26], '%d/%m/%Y %I:%M:%S %p')
+                    data_publicacio_adjudicacio = data_publicacio_adjudicacio.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    data_publicacio_adjudicacio = datetime.strptime(row[26], '%d/%m/%Y')
+                    data_publicacio_adjudicacio = datetime.combine(data_publicacio_adjudicacio.date(), datetime.min.time())
             else:
                 data_publicacio_adjudicacio = None
 
-            data_adjudicacio_contracte = row[41]
+            print('data_publicacio_adjudicacio: ' )
+            print(data_publicacio_adjudicacio)
+
+            data_adjudicacio_contracte = None
             if(row[41] != ''):
-                data_adjudicacio_contracte = datetime.strptime(data_adjudicacio_contracte, '%d/%m/%Y %I:%M:%S %p')
-                data_adjudicacio_contracte = data_adjudicacio_contracte.strftime('%Y-%m-%d %H:%M:%S')
+                print(len(row[41]))
+                if(len(row[41]) > 10):
+                    data_adjudicacio_contracte = datetime.strptime(row[41], '%d/%m/%Y %I:%M:%S %p')
+                    data_adjudicacio_contracte = data_adjudicacio_contracte.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    data_adjudicacio_contracte = datetime.strptime(row[41], '%d/%m/%Y')
+                    data_adjudicacio_contracte = datetime.combine(data_adjudicacio_contracte.date(), datetime.min.time())
             else:
                 data_adjudicacio_contracte = None
 
-            data_formalitzacio_contracte = row[42]
+            print('data_adjudicacio_contracte: ')
+            print(data_adjudicacio_contracte)
+
+            data_formalitzacio_contracte = None
             if(row[42] != ''):
-                data_formalitzacio_contracte = datetime.strptime(data_formalitzacio_contracte, '%d/%m/%Y %I:%M:%S %p')
-                data_formalitzacio_contracte = data_formalitzacio_contracte.strftime('%Y-%m-%d %H:%M:%S')  
+                if(len(row[42]) > 10):
+                    data_formalitzacio_contracte = datetime.strptime(row[42], '%d/%m/%Y %I:%M:%S %p')
+                    data_formalitzacio_contracte = data_formalitzacio_contracte.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    data_formalitzacio_contracte = datetime.strptime(row[42], '%d/%m/%Y')
+                    data_formalitzacio_contracte = datetime.combine(data_formalitzacio_contracte.date(), datetime.min.time())
+                    data_formalitzacio_contracte = data_formalitzacio_contracte.replace(hour=0, minute=0, second=0)
             else:
+                print('Alomejor ha petado')
                 data_formalitzacio_contracte = None            
 
-            termini_presentacio_ofertes = row[22]
+            print('data_formalitzacio_contracte: ')
+            print(data_formalitzacio_contracte)
+
+            termini_presentacio_ofertes = None
             if(row[22] != ''):
-                termini_presentacio_ofertes = datetime.strptime(termini_presentacio_ofertes, '%d/%m/%Y %I:%M:%S %p')
-                termini_presentacio_ofertes = termini_presentacio_ofertes.strftime('%Y-%m-%d %H:%M:%S')  
+                print(len(row[22]))
+                if(len(row[22]) > 10):
+                    termini_presentacio_ofertes = datetime.strptime(row[22], '%d/%m/%Y %I:%M:%S %p')
+                    termini_presentacio_ofertes = termini_presentacio_ofertes.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    termini_presentacio_ofertes = datetime.strptime(row[22], '%d/%m/%Y')
+                    termini_presentacio_ofertes = datetime.combine(termini_presentacio_ofertes.date(), datetime.min.time())
             else:
                 termini_presentacio_ofertes = None
+
+            print('termini_presentacio_ofertes: ')
+            print(termini_presentacio_ofertes)
+            print('/////////////////////////////////////////////////////////////////////////////////////////////')
 
             #Modificamos los numeros decimales para que sean aceptados por Django
             pressupost = row[17]
@@ -203,6 +243,61 @@ def create_db_from_csv(request):
             else:
                 ofertes_rebudes = None
 
+
+            codi_cpv = None
+            if(row[31] != ''):
+                codi_cpv = int(row[31])
+
+            print(row[13])    
+            print(row[14])    
+            print(row[15])    
+            print(row[16])
+            if(pressupost is None):
+                print('None')    
+            else:
+                print(pressupost)
+            if(valor_estimat_contracte is None):
+                print('None')
+            else:
+                print(valor_estimat_contracte)    
+            print(row[21])
+            if(termini_presentacio_ofertes is None):
+                print('None')
+            else:    
+                print(termini_presentacio_ofertes)
+            if(data_publicacio_anunci is None):    
+                print('None')    
+            else:
+                print(data_publicacio_anunci)
+            if(data_publicacio_adjudicacio is None):
+                print('None')
+            else:
+                print(data_publicacio_adjudicacio)    
+            print(row[31])
+            if(import_adjudicacio_sense_iva is None):
+                print('None')
+            else:    
+                print(import_adjudicacio_sense_iva)    
+            if(import_adjudicacio_amb_iva is None):
+                print('None')
+            else:
+                print(import_adjudicacio_amb_iva)
+            if(ofertes_rebudes is None):
+                print('None')
+            else:    
+                print(ofertes_rebudes)    
+            print(row[38])
+            if(data_adjudicacio_contracte is None):    
+                print('None')
+            else:
+                print(data_adjudicacio_contracte)  
+            if(data_formalitzacio_contracte is None):
+                print('None')
+            else:  
+                print(data_formalitzacio_contracte)    
+            print(row[39])
+        
+
             LicitacioPublica.objects.create(
                 procediment = row[13],
                 fase_publicacio = row[14],
@@ -214,7 +309,7 @@ def create_db_from_csv(request):
                 termini_presentacio_ofertes = termini_presentacio_ofertes,
                 data_publicacio_anunci = data_publicacio_anunci,
                 data_publicacio_adjudicacio = data_publicacio_adjudicacio,
-                codi_cpv = row[31],
+                codi_cpv = codi_cpv,
                 import_adjudicacio_sense_iva = import_adjudicacio_sense_iva,
                 import_adjudicacio_amb_iva = import_adjudicacio_amb_iva,
                 ofertes_rebudes = ofertes_rebudes,
@@ -228,6 +323,8 @@ def create_db_from_csv(request):
                 organ = get_organ(row[5], row[4]),
                 tipus_contracte = get_tipus_contracte(row[11], row[12])
                 ) 
+
+
 
 
 def delete_all_licitacions_publicas(request):
