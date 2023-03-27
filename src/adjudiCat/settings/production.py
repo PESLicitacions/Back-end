@@ -6,6 +6,7 @@ env = environ.Env(  # <-- Updated!
     DEBUG=(bool, False),
 )
 
+
 environ.Env.read_env(BASE_DIR / '.env')
 
 SECRET_KEY = env('SECRET_KEY')
@@ -19,9 +20,9 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
 
-CSRF_TRUSTED_ORIGINS = ['https://*.fib.upc.edu:40410']
+CSRF_TRUSTED_ORIGINS = ['*']
 
-ALLOWED_HOSTS = ['0.0.0.0','nattech.fib.upc.edu',]
+ALLOWED_HOSTS = ['0.0.0.0','nattech.fib.upc.edu','172.16.4.41','172.19.0.1', '172.17.0.1','[::1]', '127.0.0.1', 'localhost']
 
 DATABASES = {
     'default': {
@@ -29,7 +30,7 @@ DATABASES = {
         'NAME': env('MYSQL_DATABASE'),
         'USER':  env('MYSQL_USER'),
         'PASSWORD':  env('MYSQL_PASSWORD'),
-        'HOST':  env('MYSQL_DATABASE_HOST'),
-        'PORT':  env('MYSQL_DATABASE_PORT'),
+        'HOST': 'db',
+        'PORT':  '3306',
     }
 }
