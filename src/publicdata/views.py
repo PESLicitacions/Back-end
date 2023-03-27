@@ -6,7 +6,7 @@ from decimal import Decimal, getcontext
 import requests
 import json
 import csv
-import datetime
+from datetime import datetime
 
 
 def get_data(request):
@@ -136,28 +136,88 @@ def get_data(request):
 
 def create_db_from_csv(request):
     with open('/home/santi/Downloads/Contractaci__p_blica_a_Catalunya__licitacions_i_adjudicacions_en_curs.csv') as f:
+        time_format = '%d/%m/%Y %I:%M:%S %p'
+        
         reader = csv.reader(f)
         next(reader)
         for row in reader:
-            data_publicacio_anunci = datetime.datetime.strptime(row[25], '%d/%m/%Y %I:%M:%S %p')
-            data_publicacio_adjudicacio = datetime.datetime.strptime(row[26], '%d/%m/%Y %I:%M:%S %p')
-            data_adjudicacio_contracte = datetime.datetime.strptime(row[41], '%d/%m/%Y %I:%M:%S %p')
-            data_formalitzacio_contracte = datetime.datetime.strptime(row[42], '%d/%m/%Y %I:%M:%S %p')
+
+            #Modificamos todas las fechas al formato correcto de DateTime 
+
+            data_publicacio_anunci = row[25]
+            if(row[25] != ''):
+                data_publicacio_anunci = datetime.strptime(data_publicacio_anunci, '%d/%m/%Y %I:%M:%S %p')
+                data_publicacio_anunci = data_publicacio_anunci.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                data_publicacio_anunci = None
+            
+
+            data_publicacio_adjudicacio = row[26]
+            if(row[26] != ''):
+                data_publicacio_adjudicacio = datetime.strptime(data_publicacio_adjudicacio, '%d/%m/%Y %I:%M:%S %p')
+                data_publicacio_adjudicacio = data_publicacio_adjudicacio.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                data_publicacio_adjudicacio = None
+
+            data_adjudicacio_contracte = row[41]
+            if(row[41] != ''):
+                data_adjudicacio_contracte = datetime.strptime(data_adjudicacio_contracte, '%d/%m/%Y %I:%M:%S %p')
+                data_adjudicacio_contracte = data_adjudicacio_contracte.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                data_adjudicacio_contracte = None
+
+            data_formalitzacio_contracte = row[42]
+            if(row[42] != ''):
+                data_formalitzacio_contracte = datetime.strptime(data_formalitzacio_contracte, '%d/%m/%Y %I:%M:%S %p')
+                data_formalitzacio_contracte = data_formalitzacio_contracte.strftime('%Y-%m-%d %H:%M:%S')  
+            else:
+                data_formalitzacio_contracte = None            
+
+            termini_presentacio_ofertes = row[22]
+            if(row[22] != ''):
+                termini_presentacio_ofertes = datetime.strptime(termini_presentacio_ofertes, '%d/%m/%Y %I:%M:%S %p')
+                termini_presentacio_ofertes = termini_presentacio_ofertes.strftime('%Y-%m-%d %H:%M:%S')  
+            else:
+                termini_presentacio_ofertes = None
+
+            #Modificamos los numeros decimales para que sean aceptados por Django
+            pressupost = row[17]
+            if(pressupost == ''):
+                pressupost = None
+
+            valor_estimat_contracte = row[18]
+            if(valor_estimat_contracte == ''):
+                valor_estimat_contracte = None
+
+            import_adjudicacio_sense_iva = row[35]
+            if(import_adjudicacio_sense_iva == ''):
+                import_adjudicacio_sense_iva = None
+
+            import_adjudicacio_amb_iva = row[36]
+            if(import_adjudicacio_amb_iva == ''):
+                import_adjudicacio_amb_iva = None
+
+            ofertes_rebudes = row[37]
+            if row[37].isdigit():
+                ofertes_rebudes = int(row[37])
+            else:
+                ofertes_rebudes = None
+
             LicitacioPublica.objects.create(
                 procediment = row[13],
                 fase_publicacio = row[14],
                 denominacio = row[15],
                 objecte_contracte = row[16],
-                pressupost = row[17],
-                valor_estimat_contracte = row[18],
+                pressupost = pressupost,
+                valor_estimat_contracte = valor_estimat_contracte,
                 duracio_contracte = row[21],
-                termini_presentacio_ofertes = row[22],
+                termini_presentacio_ofertes = termini_presentacio_ofertes,
                 data_publicacio_anunci = data_publicacio_anunci,
                 data_publicacio_adjudicacio = data_publicacio_adjudicacio,
                 codi_cpv = row[31],
-                import_adjudicacio_sense_iva = row[35],
-                import_adjudicacio_amb_iva = row[36],
-                ofertes_rebudes = row[37],
+                import_adjudicacio_sense_iva = import_adjudicacio_sense_iva,
+                import_adjudicacio_amb_iva = import_adjudicacio_amb_iva,
+                ofertes_rebudes = ofertes_rebudes,
                 resultat = row[38],
                 data_adjudicacio_contracte = data_adjudicacio_contracte,
                 data_formalitzacio_contracte = data_formalitzacio_contracte,
