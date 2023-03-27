@@ -59,7 +59,7 @@ class LicitacioPublica(models.Model):
     termini_presentacio_ofertes = models.DateTimeField(null=True)
     data_publicacio_anunci = models.DateTimeField(null=True)
     data_publicacio_adjudicacio = models.DateTimeField(null=True)
-    codi_cpv = models.IntegerField(null=True)
+    codi_cpv = models.CharField(max_length=200, null=True)
     import_adjudicacio_sense_iva = models.DecimalField(decimal_places=2, max_digits=100, null=True)
     import_adjudicacio_amb_iva = models.DecimalField(decimal_places=2, max_digits=100, null=True)
     ofertes_rebudes = models.IntegerField(null=True)

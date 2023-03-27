@@ -246,7 +246,7 @@ def create_db_from_csv(request):
 
             codi_cpv = None
             if(row[31] != ''):
-                codi_cpv = int(row[31])
+                codi_cpv = row[31]
 
             print(row[13])    
             print(row[14])    
