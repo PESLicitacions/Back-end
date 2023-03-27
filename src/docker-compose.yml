@@ -3,40 +3,31 @@ version: "3.9"
 
 services:
   db:
-    image: mysql:8
-    ports:
-      - 3306:3306
-    expose:
-      # Opens port 3306 on the container
-      - 3306
-      # Where our data will be persisted
+    image: postgres:13
     environment:
-      - MYSQL_DATABASE=mysqldatabase
-      - MYSQL_USER=adjudicat
-      - MYSQL_PASSWORD=adjudicatRoot
-      - MYSQL_ROOT_PASSWORD=1234
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
     volumes:
-      - /tmp/app/mysqld:/var/run/mysqld
-      - mysql_db:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data/
 
   web:
     build: .
-    command: gunicorn --bind :8080 adjudiCat.wsgi:application
+    ports:
+      - "8080:8080"
     env_file: ./.env
     restart: always
-    ports:
-      - 8080:8080
     expose:
       - 8080
-    volumes:
-      - ./app/:/usr/src/app/
     depends_on:
       - db
+    command: gunicorn --bind :8080 adjudiCat.wsgi:application
+    #gunicorn --bind :8080 adjudiCat.wsgi:application
+    volumes:
+      - .:/code
     image: app:adjudicat
     container_name: adjudicat_backend
 
 volumes:
-  mysql_db:
+  postgres_data:
 
 
 
