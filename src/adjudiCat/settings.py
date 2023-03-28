@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     
     #apps    
     'licitacions',
+    'api',
 ]
 
 MIDDLEWARE = [

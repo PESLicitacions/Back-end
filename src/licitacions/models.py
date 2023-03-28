@@ -72,6 +72,9 @@ class LicitacioPublica(models.Model):
     organ = models.ForeignKey(Organ, to_field='codi', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
     tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
 
+    def tipus_contracte_name(self):
+        return TipusContracte.objects.filter(id=self.tipus_contracte).__str__
+
 class LicitacioPrivada(models.Model):
     procediment = models.CharField(max_length=150, choices=choices.procediments, null=True)
     fase_publicacio = models.CharField(max_length=80, choices=choices.fase_publicacio, null=True)

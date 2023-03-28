@@ -3,8 +3,10 @@ from licitacions import api
 
 router = routers.DefaultRouter()
 
-router.register('api/licitacions_publiques', api.LicitacioPublicaViewSet, 'licitacions_publiques')
-router.register('api/licitacions_privades', api.LicitacioPrivadaViewSet, 'licitacions_privades')
+router.register('api/licitacions_publiques', api.LicitacioPublicaPreviewViewSet, 'licitacions_publiques_preview')
+router.register('api/licitacio_publica_details', api.LicitacioPublicaDetailsViewSet, 'licitacions_publiques_details')
+router.register('api/licitacions_privades', api.LicitacioPrivadaPreviewViewSet, 'licitacions_privades_preview')
+router.register('api/licitacio_privada_details', api.LicitacioPrivadaDetailsViewSet, 'licitacions_privades_details')
 router.register('api/localitzacions', api.LocalitzacioViewSet, 'localitzacions')
 router.register('api/ambit', api.AmbitViewSet, 'ambits')
 router.register('api/departament', api.DepartamentViewSet, 'departaments')

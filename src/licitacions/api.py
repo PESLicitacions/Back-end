@@ -3,16 +3,28 @@ from licitacions import models, serializers
 from rest_framework import viewsets, permissions
 
 
-class LicitacioPublicaViewSet(viewsets.ModelViewSet):
+class LicitacioPublicaPreviewViewSet(viewsets.ModelViewSet):
     queryset = models.LicitacioPublica.objects.all()
     permission_classes = [permissions.AllowAny]
-    serializer_class = serializers.LicitacioPublicaSerializer
+    serializer_class = serializers.LicitacioPublicaPreviewSerializer
 
 
-class LicitacioPrivadaViewSet(viewsets.ModelViewSet):
+class LicitacioPublicaDetailsViewSet(viewsets.ModelViewSet):
+    queryset = models.LicitacioPublica.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = serializers.LicitacioPublicaDetailsSerializer
+
+
+class LicitacioPrivadaPreviewViewSet(viewsets.ModelViewSet):
     queryset = models.LicitacioPrivada.objects.all()
     permission_classes = [permissions.AllowAny]
-    serializer_class = serializers.LicitacioPrivadaSerializer
+    serializer_class = serializers.LicitacioPrivadaPreviewSerializer
+
+
+class LicitacioPrivadaDetailsViewSet(viewsets.ModelViewSet):
+    queryset = models.LicitacioPrivada.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = serializers.LicitacioPrivadaDetailsSerializer
 
 
 class TipusContracteViewSet(viewsets.ModelViewSet):
