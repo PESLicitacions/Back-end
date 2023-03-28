@@ -34,10 +34,27 @@ A continuació actualitzar el fitxer requirements.txt
 python -m pip freeze > requirements.txt
 ```
 
-
-
-# Com executar el server en Django
-Dins el directori src executar:
+# Como entrar a la rama develop
+Primero comprobar en que rama estmos:
 ```
-python manage.py runserver 
+git status 
 ```
+Nos lo indicarà diciendo: On branch <branch_name>
+
+Ejecutar el comando:
+```
+git checkout develop 
+```
+Tras ejectuarlo deberia cambiar a la rama develop, para asegurarse volver a ejecutar git status y 
+asegurarnos de que la rama actual es develop.
+
+# Como crear una nueva rama
+Crear una rama local:
+```
+git checkout -b <branch_name>
+```
+# Como convertir la rama local a remota
+```
+git push develop <local_branch>
+```
+

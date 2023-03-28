@@ -17,9 +17,12 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from publicdata.views import get_data, delete_all_licitacions_publicas, create_db_from_csv
 
 urlpatterns = [
     #django URLS
     path('admin/', admin.site.urls),
-    path('', include('licitacions.urls'))
+    path('', include('licitacions.urls')),
+    path('get/', create_db_from_csv, name='getData'),
+    path('deleteLicitacionsPrivadas/', delete_all_licitacions_publicas, name='delete'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
