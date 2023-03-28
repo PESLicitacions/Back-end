@@ -13,12 +13,17 @@ SECRET_KEY = env('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-# Opcions per el deploy
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
+# Opcions per el deploy no segures
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
+
+#------Cambiar per fer el deploy de manera segura
+#SESSION_COOKIE_SECURE = False
+#CSRF_COOKIE_SECURE = False
+#SECURE_SSL_REDIRECT = False
 
 
 ALLOWED_HOSTS = ['0.0.0.0','nattech.fib.upc.edu','172.16.4.41','172.19.0.1', '172.17.0.1','[::1]', '127.0.0.1', 'localhost',]

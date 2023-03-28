@@ -6,6 +6,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 
 WORKDIR /code
 
+
 COPY ./requirements.txt .
 COPY ./.env .
 RUN pip install -r requirements.txt
