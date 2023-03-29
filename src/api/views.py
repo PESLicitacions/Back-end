@@ -2,11 +2,30 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
 from rest_framework.views import APIView
+from rest_framework import generics
 
 from licitacions.models import *
 from licitacions.serializers import *
 
 
+class LicitacionsPubliquesList(generics.ListAPIView):
+    queryset = LicitacioPublica.objects.all()
+    serializer_class = LicitacioPublicaPreviewSerializer
+
+class LicitacioPublicaDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = LicitacioPublica.objects.all()
+    serializer_class = LicitacioPublicaDetailsSerializer
+
+class LicitacionsPrivadesList(generics.ListCreateAPIView):
+    queryset = LicitacioPrivada.objects.all()
+    serializer_class = LicitacioPrivadaPreviewSerializer
+
+class LicitacioPrivadaDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = LicitacioPrivada.objects.all()
+    serializer_class = LicitacioPrivadaDetailsSerializer
+
+
+'''
 class licitacions_publiques(APIView):
     def get(self, request):
         licitacions_publiques = LicitacioPublica.objects.all()
@@ -96,4 +115,4 @@ class licitacio_privada_detail(APIView):
     def delete(self, request, pk):
         lpriv = self.get_object(pk)
         lpriv.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)'''
