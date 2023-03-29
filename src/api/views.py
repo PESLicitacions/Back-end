@@ -11,7 +11,7 @@ from licitacions.serializers import *
 class LicitacionsPubliquesList(generics.ListAPIView):
     queryset = LicitacioPublica.objects.all()
     serializer_class = LicitacioPublicaPreviewSerializer
-    filterset_fields = ['lloc_execucio', "pressupost", "ambit", "departament", "organ", "tipus_contracte"] 
+    filterset_fields = ['lloc_execucio', "pressupost", "ambit", "departament", "organ", "tipus_contracte", "duracio_contracte"] 
 
 
 class LicitacioPublicaDetail(generics.RetrieveUpdateDestroyAPIView):
