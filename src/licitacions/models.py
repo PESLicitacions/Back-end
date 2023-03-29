@@ -55,7 +55,7 @@ class LicitacioPublica(models.Model):
     objecte_contracte = models.TextField(null=True)
     pressupost = models.DecimalField(decimal_places=2, max_digits=100, null=True)
     valor_estimat_contracte = models.DecimalField(decimal_places=2, max_digits=100, null=True)
-    duracio_contracte = models.CharField(max_length=80, null=True)
+    duracio_contracte = models.IntegerField(null=True)
     termini_presentacio_ofertes = models.DateTimeField(null=True)
     data_publicacio_anunci = models.DateTimeField(null=True)
     data_publicacio_adjudicacio = models.DateTimeField(null=True)
@@ -72,6 +72,8 @@ class LicitacioPublica(models.Model):
     departament = models.ForeignKey(Departament, to_field='codi', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
     organ = models.ForeignKey(Organ, to_field='codi', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
     tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="licitacio_publica", null=True, on_delete=models.SET_NULL)
+    data_inici = models.DateField(null=True)
+    data_fi = models.DateField(null=True)
 
     def tipus_contracte_name(self):
         return TipusContracte.objects.filter(id=self.tipus_contracte).__str__

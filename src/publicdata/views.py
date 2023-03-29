@@ -6,7 +6,7 @@ from decimal import Decimal, getcontext
 import requests
 import json
 import csv
-from datetime import datetime
+from datetime import datetime, date
 
 
 def get_data(request):
@@ -17,6 +17,8 @@ def get_data(request):
     data = response_API.text
     parse_json = json.loads(data)
     print('Hay ' + str(len(parse_json)) + 'filas')
+
+    fecha_formato = '%d/%m/%Y'
 
 
     with transaction.atomic():
@@ -40,6 +42,20 @@ def get_data(request):
 
                 
             duracio_contracte = licitacio.get('duracio_contracte')
+            data_inici = None
+            data_fi = None
+
+            #Tiene data inici i data fi
+            if(duracio_contracte != None):
+                fechas = duracio_contracte.split()
+                if(len(fechas[0]) == 10):
+
+                    data_inici = datetime.strptime(fechas[0], fecha_formato).date()
+                    data_fi = datetime.strptime(fechas[2], fecha_formato).date()
+
+                    duracio_contracte = (data_fi - data_inici).days
+                else:
+                    duracio_contracte = int(fechas[0])*365 + int(fechas[2])*30 + int(fechas[4])
 
             termini_presentacio_ofertes = licitacio.get('termini_presentacio_ofertes')
             if(termini_presentacio_ofertes is not None):
@@ -126,7 +142,9 @@ def get_data(request):
                             ambit = ambit, 
                             departament = departament, 
                             organ = organ,
-                            tipus_contracte = tipus_contracte
+                            tipus_contracte = tipus_contracte,
+                            data_inici = data_inici,
+                            data_fi = data_fi
                             )
             
            # if(exists):
