@@ -58,7 +58,7 @@ def get_data(request):
 
             codi_cpv = licitacio.get('codi_cpv')
             if(codi_cpv is not None):
-                codi_cpv = int(codi_cpv)
+                codi_cpv = str(codi_cpv)
 
             import_adjudicacio_sense_iva = licitacio.get('import_adjudicacio_sense')
             if(import_adjudicacio_sense_iva is None):

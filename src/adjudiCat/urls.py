@@ -23,6 +23,6 @@ urlpatterns = [
     #django URLS
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('get/', create_db_from_csv, name='getData'),
+    path('get/', get_data, name='getData'),
     path('deleteLicitacionsPrivadas/', delete_all_licitacions_publicas, name='delete'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
