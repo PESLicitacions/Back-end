@@ -3,17 +3,49 @@ from rest_framework import status
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework import generics
+from django.db.models import Q
 
 from licitacions.models import *
 from licitacions.serializers import *
 
 
 class LicitacionsPubliquesList(generics.ListAPIView):
-    queryset = LicitacioPublica.objects.all()
     serializer_class = LicitacioPublicaPreviewSerializer
-    filterset_fields = ['lloc_execucio', "pressupost", "ambit", "departament", "organ", "tipus_contracte", "duracio_contracte"] 
+    
+    def get_queryset(self):
+        queryset = LicitacioPublica.objects.all()
 
+        localitzacio = self.request.query_params.get('lloc_execucio')
+        if localitzacio is not None:
+            queryset = queryset.filter(lloc_execucio__nom__icontains=localitzacio)
 
+        pressupost_min = self.request.query_params.get('pressupost_min')
+        if pressupost_min is not None:
+            queryset = queryset.filter(pressupost__gte=pressupost_min)
+        
+        pressupost_max = self.request.query_params.get('pressupost_max')
+        if pressupost_max is not None:
+            queryset = queryset.filter(pressupost__lte=pressupost_max)
+        
+        ambit = self.request.query_params.get('ambit')
+        if ambit is not None:
+            queryset = queryset.filter(ambit__nom__icontains=ambit)
+
+        departament = self.request.query_params.get('departament')
+        if departament is not None:
+            queryset = queryset.filter(departament__nom__icontains=departament)
+
+        organ = self.request.query_params.get('organ')
+        if organ is not None:
+            queryset = queryset.filter(organ__nom__icontains=organ)
+        
+        tipus_contracte = self.request.query_params.get('tipus_contracte')
+        if tipus_contracte is not None:
+            queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
+
+        return queryset
+    
+        
 class LicitacioPublicaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = LicitacioPublica.objects.all()
     serializer_class = LicitacioPublicaDetailsSerializer
@@ -26,95 +58,3 @@ class LicitacioPrivadaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = LicitacioPrivada.objects.all()
     serializer_class = LicitacioPrivadaDetailsSerializer
 
-
-'''
-class licitacions_publiques(APIView):
-    def get(self, request):
-        licitacions_publiques = LicitacioPublica.objects.all()
-        serializer = LicitacioPublicaPreviewSerializer(licitacions_publiques, many=True)
-        print(serializer.data)
-        return Response(serializer.data)
-    
-
-    def post(self, request):
-        serializer = LicitacioPublicaDetailsSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            instance = serializer.save()
-            print(instance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class licitacio_publica_detail(APIView):
-    def get_object(self, pk):
-        try:
-            return LicitacioPublica.objects.get(pk=pk)
-        except LicitacioPublica.DoesNotExist:
-            raise Http404
-
-
-    def get(self, request, pk):
-        lpub = self.get_object(pk)
-        serializer = LicitacioPublicaDetailsSerializer(lpub)
-        return Response(serializer.data)
-
-
-    def put(self, request, pk):
-        lpub = self.get_object(pk)
-        serializer = LicitacioPublicaDetailsSerializer(lpub, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            print(serializer.data)
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    def delete(self, request, pk):
-        lpub = self.get_object(pk)
-        lpub.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    
-
-class licitacions_privades(APIView):
-    def get(self, request):
-        licitacions_privades = LicitacioPrivada.objects.all()
-        serializer = LicitacioPrivadaPreviewSerializer(licitacions_privades, many=True)
-        print(serializer.data)
-        return Response(serializer.data)
-    
-
-    def post(self, request):
-        serializer = LicitacioPrivadaDetailsSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            instance = serializer.save()
-            print(instance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class licitacio_privada_detail(APIView):
-    def get_object(self, pk):
-        try:
-            return LicitacioPrivada.objects.get(pk=pk)
-        except LicitacioPrivada.DoesNotExist:
-            raise Http404
-
-
-    def get(self, request, pk):
-        lpriv = self.get_object(pk)
-        serializer = LicitacioPrivadaDetailsSerializer(lpriv)
-        return Response(serializer.data)
-
-
-    def put(self, request, pk):
-        lpriv = self.get_object(pk)
-        serializer = LicitacioPrivadaDetailsSerializer(lpriv, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            print(serializer.data)
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    def delete(self, request, pk):
-        lpriv = self.get_object(pk)
-        lpriv.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)'''
