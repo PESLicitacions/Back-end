@@ -42,9 +42,11 @@ INSTALLED_APPS = [
     
     #django rest API apps
     'rest_framework',
+    'django_filters',
     
     #apps
     'licitacions',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +77,12 @@ TEMPLATES = [
         },
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20
+}
 
 WSGI_APPLICATION = 'adjudiCat.wsgi.application'
 

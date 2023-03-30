@@ -1,10 +1,30 @@
 from rest_framework import serializers
-from .models import Licitacio
+from licitacions import models
 
-class LicitacioSerializer(serializers.ModelSerializer):
+class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
+    tipus_contracte = serializers.StringRelatedField(many=False)
     class Meta:
-        model = Licitacio
-        fields = ('id', 'fase_publicacio', 'denominacio', 'objecte_contracte', 'pressupost', 'valor_estimat_contracte',
-                  'valor_estimat_contracte', 'duracio_contracte', 'termini_presentacio_ofertes', 'data_publicacio_anunci',
-                  'data_publicacio_adjudicacio', 'codi_cpv', 'import_adjudicacio_sense_iva', 'import_adjudicacio_amb_iva',
-                  'ofertes_rebudes', 'resultat', 'data_adjudicacio_contracte', 'data_formalitzacio_contracte')
+        model = models.LicitacioPublica
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte')
+
+
+class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
+    tipus_contracte = serializers.StringRelatedField(many=False)
+    ambit = serializers.StringRelatedField(many=False)
+    departament = serializers.StringRelatedField(many=False)
+    organ = serializers.StringRelatedField(many=False)
+    class Meta:
+        model = models.LicitacioPublica
+        fields = '__all__'
+
+
+class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.LicitacioPrivada
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte')
+
+
+class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.LicitacioPrivada
+        fields = '__all__'
