@@ -42,7 +42,23 @@ class LicitacionsPubliquesList(generics.ListAPIView):
         tipus_contracte = self.request.query_params.get('tipus_contracte')
         if tipus_contracte is not None:
             queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
+        
+        duracio_min = self.request.query_params.get('duracio_min')
+        if duracio_min is not None:
+            queryset = queryset.filter(duracio_contracte__gte=duracio_min)
+        
+        duracio_max = self.request.query_params.get('duracio_max')
+        if duracio_max is not None:
+            queryset = queryset.filter(duracio_contracte__lte=duracio_max)
+        
+        data_inici = self.request.query_params.get('data_inici')
+        if data_inici is not None:
+            queryset = queryset.filter(data_inici__gte=data_inici)
 
+        data_fi = self.request.query_params.get('data_fi')
+        if data_fi is not None:
+            queryset = queryset.filter(data_fi__lte=data_fi)
+            
         return queryset
     
         
