@@ -28,3 +28,37 @@ class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.LicitacioPrivada
         fields = '__all__'
+
+
+class LocalitzacioInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Localitzacio
+        fields = ('nom',)
+
+
+class AmbitInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Ambit
+        fields = '__all__'
+
+
+class DepartamentInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Departament
+        fields = '__all__'
+
+
+class OrganInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Organ
+        fields = '__all__'
+
+
+class TipusContracteInfoSerializer(serializers.ModelSerializer):
+    contracte_str = serializers.SerializerMethodField()
+    class Meta:
+        model = models.TipusContracte
+        fields = ('id', 'contracte_str')
+    
+    def get_contracte_str(self, obj):
+        return str(obj)
