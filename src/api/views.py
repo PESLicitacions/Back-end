@@ -7,6 +7,49 @@ from licitacions.models import *
 from licitacions.serializers import *
 
 
+class LicitacionsList(generics.ListAPIView):
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        queryset = Licitacio.objects.all()
+
+        localitzacio = self.request.query_params.get('lloc_execucio')
+        if localitzacio is not None:
+            queryset = queryset.filter(lloc_execucio__nom__icontains=localitzacio)
+            #queryset = queryset.filter(lloc_execucio_id=localitzacio)
+
+        pressupost_min = self.request.query_params.get('pressupost_min')
+        if pressupost_min is not None:
+            queryset = queryset.filter(pressupost__gte=pressupost_min)
+        
+        pressupost_max = self.request.query_params.get('pressupost_max')
+        if pressupost_max is not None:
+            queryset = queryset.filter(pressupost__lte=pressupost_max)
+        
+        tipus_contracte = self.request.query_params.get('tipus_contracte')
+        if tipus_contracte is not None:
+            #queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
+            queryset = queryset.filter(tipus_contracte_id=tipus_contracte)
+        
+        duracio_min = self.request.query_params.get('duracio_min')
+        if duracio_min is not None:
+            queryset = queryset.filter(duracio_contracte__gte=duracio_min)
+        
+        duracio_max = self.request.query_params.get('duracio_max')
+        if duracio_max is not None:
+            queryset = queryset.filter(duracio_contracte__lte=duracio_max)
+        
+        data_inici = self.request.query_params.get('data_inici')
+        if data_inici is not None:
+            queryset = queryset.filter(data_inici__gte=data_inici)
+
+        data_fi = self.request.query_params.get('data_fi')
+        if data_fi is not None:
+            queryset = queryset.filter(data_fi__lte=data_fi)
+
+        return queryset
+
+
 class LicitacionsPubliquesList(generics.ListAPIView):
     serializer_class = LicitacioPublicaPreviewSerializer
     
@@ -71,8 +114,46 @@ class LicitacioPublicaDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class LicitacionsPrivadesList(generics.ListCreateAPIView):
-    queryset = LicitacioPrivada.objects.all()
     serializer_class = LicitacioPrivadaPreviewSerializer
+
+    def get_queryset(self):
+        queryset = LicitacioPrivada.objects.all()
+
+        localitzacio = self.request.query_params.get('lloc_execucio')
+        if localitzacio is not None:
+            queryset = queryset.filter(lloc_execucio__nom__icontains=localitzacio)
+            #queryset = queryset.filter(lloc_execucio_id=localitzacio)
+
+        pressupost_min = self.request.query_params.get('pressupost_min')
+        if pressupost_min is not None:
+            queryset = queryset.filter(pressupost__gte=pressupost_min)
+        
+        pressupost_max = self.request.query_params.get('pressupost_max')
+        if pressupost_max is not None:
+            queryset = queryset.filter(pressupost__lte=pressupost_max)
+        
+        tipus_contracte = self.request.query_params.get('tipus_contracte')
+        if tipus_contracte is not None:
+            #queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
+            queryset = queryset.filter(tipus_contracte_id=tipus_contracte)
+        
+        duracio_min = self.request.query_params.get('duracio_min')
+        if duracio_min is not None:
+            queryset = queryset.filter(duracio_contracte__gte=duracio_min)
+        
+        duracio_max = self.request.query_params.get('duracio_max')
+        if duracio_max is not None:
+            queryset = queryset.filter(duracio_contracte__lte=duracio_max)
+        
+        data_inici = self.request.query_params.get('data_inici')
+        if data_inici is not None:
+            queryset = queryset.filter(data_inici__gte=data_inici)
+
+        data_fi = self.request.query_params.get('data_fi')
+        if data_fi is not None:
+            queryset = queryset.filter(data_fi__lte=data_fi)
+
+        return queryset
 
 
 class LicitacioPrivadaDetail(generics.RetrieveUpdateDestroyAPIView):

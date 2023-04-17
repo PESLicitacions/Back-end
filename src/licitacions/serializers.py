@@ -1,6 +1,13 @@
 from rest_framework import serializers
 from licitacions import models
 
+class LicitacioPreviewSerializer(serializers.ModelSerializer):
+    tipus_contracte = serializers.StringRelatedField(many=False)
+
+    class Meta:
+        model = models.Licitacio
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte')
+
 class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
     class Meta:
