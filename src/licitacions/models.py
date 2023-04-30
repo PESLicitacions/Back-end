@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from licitacions import choices
 
@@ -84,3 +85,13 @@ class LicitacioPublica(Licitacio):
 class LicitacioPrivada(Licitacio):
     empresa = models.CharField(max_length=150, null=True)
 
+
+class ListaFavorits(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='favorits')
+    licitacio = models.ForeignKey(Licitacio, on_delete=models.CASCADE, null=True, blank=True, related_name='favorits')
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'licitacio'], name='unique_favorits'
+            )
+        ]

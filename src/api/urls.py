@@ -5,9 +5,10 @@ from users.views import register_view, login_view
 
 urlpatterns = [
     path('licitacions', views.LicitacionsList.as_view()),
-    path('licitacions/<int:pk>/', views.LicitacioDetailView.as_view()),
     path('licitacions/publiques', views.LicitacionsPubliquesList.as_view()),
     path('licitacions/privades', views.LicitacionsPrivadesList.as_view()),
+    path('licitacions/<int:pk>/', views.LicitacioDetailView.as_view()),
+    path('licitacions/<int:pk>/add-to-favorites', views.add_to_favorites),
     path('localitzacions', views.LocalitzacionsInfo.as_view()),
     path('ambits', views.AmbitsInfo.as_view()),
     path('departaments', views.DepartamentsInfo.as_view()),

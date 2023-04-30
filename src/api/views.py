@@ -1,3 +1,5 @@
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.pagination import LimitOffsetPagination
@@ -237,3 +239,13 @@ class TipusContracteInfo(generics.ListAPIView):
         if tipus_contracte is not None:
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
+
+
+def add_to_favorites(request, pk):
+    user = request.user
+    licitacio = get_object_or_404(Licitacio, pk=pk)
+    
+    favorit = ListaFavorits(user=user, licitacio=licitacio)
+    favorit.save()
+    response_data = {'success': True}
+    return JsonResponse(response_data)
