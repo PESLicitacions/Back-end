@@ -50,6 +50,29 @@ class LicitacionsList(generics.ListAPIView):
         return queryset
 
 
+class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
+    def get_queryset(self):
+        queryset = None
+        pk = self.kwargs.get('pk')
+        licitacio_publica = LicitacioPublica.objects.filter(pk=pk)
+        if licitacio_publica.exists():
+            queryset = LicitacioPublica.objects.all()
+        else:
+            queryset = LicitacioPrivada.objects.all()
+        return queryset
+
+    def get_serializer_class(self):
+        obj = self.get_object()
+        if isinstance(obj, LicitacioPublica):
+            print("entered lic pub serializer")
+            return LicitacioPublicaDetailsSerializer
+        elif isinstance(obj, LicitacioPrivada):
+            print("entered lic priv serializer")
+            return LicitacioPrivadaDetailsSerializer
+        else:
+            return self.serializer_class
+
+
 class LicitacionsPubliquesList(generics.ListAPIView):
     serializer_class = LicitacioPublicaPreviewSerializer
     
@@ -106,11 +129,6 @@ class LicitacionsPubliquesList(generics.ListAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
-    
-        
-class LicitacioPublicaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = LicitacioPublica.objects.all()
-    serializer_class = LicitacioPublicaDetailsSerializer
 
 
 class LicitacionsPrivadesList(generics.ListCreateAPIView):
@@ -154,11 +172,6 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
-
-
-class LicitacioPrivadaDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = LicitacioPrivada.objects.all()
-    serializer_class = LicitacioPrivadaDetailsSerializer
 
 
 class LocalitzacionsInfo(generics.ListAPIView):
