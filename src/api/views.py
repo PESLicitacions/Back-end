@@ -244,8 +244,13 @@ class TipusContracteInfo(generics.ListAPIView):
 def add_to_favorites(request, pk):
     user = request.user
     licitacio = get_object_or_404(Licitacio, pk=pk)
-    
-    favorit = ListaFavorits(user=user, licitacio=licitacio)
-    favorit.save()
-    response_data = {'success': True}
+
+    favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
+    if favorit:
+        favorit.delete()
+        response_data = {'action': 'deleted', 'success': True}
+    else:
+        favorit = ListaFavorits(user=user, licitacio=licitacio)
+        favorit.save()
+        response_data = {'action': 'added', 'success': True}
     return JsonResponse(response_data)
