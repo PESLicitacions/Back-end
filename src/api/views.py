@@ -248,9 +248,24 @@ def add_to_favorites(request, pk):
     favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
     if favorit:
         favorit.delete()
-        response_data = {'action': 'deleted', 'success': True}
+        response_data = {'licitacio': pk, 'user': user.id, 'action': 'deleted from favorites', 'success': True}
     else:
         favorit = ListaFavorits(user=user, licitacio=licitacio)
         favorit.save()
-        response_data = {'action': 'added', 'success': True}
+        response_data = {'licitacio': pk, 'user': user.id, 'action': 'added to favorites', 'success': True}
+    return JsonResponse(response_data)
+
+
+def add_to_preferences(request, pk):
+    user = request.user
+    tipus_contracte = get_object_or_404(TipusContracte, pk=pk)
+
+    preference = Preference.objects.filter(user=user, tipus_contracte=tipus_contracte).first()
+    if preference:
+        preference.delete()
+        response_data = {'tipus_contracte': pk, 'user': user.id, 'action': 'deleted from preferences', 'success': True}
+    else:
+        preference = Preference(user=user, tipus_contracte=tipus_contracte)
+        preference.save()
+        response_data = {'tipus_contracte': pk, 'user': user.id, 'action': 'added to preferences', 'success': True}
     return JsonResponse(response_data)
