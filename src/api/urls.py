@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from users.views import register_view, login_view
+from users.views import register_view, login_view, edit_perfil
 
 
 urlpatterns = [
@@ -17,5 +17,6 @@ urlpatterns = [
     path('tipus_contracte/<int:pk>/add-to-preferences', views.add_to_preferences),
     path('register/', register_view, name='register'), 
     path('login/', login_view, name='login'),
+    path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
 
 ]
