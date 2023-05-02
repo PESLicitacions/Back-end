@@ -4,6 +4,11 @@ from django.http import JsonResponse
 from .models import *
 from django.views.decorators.csrf import csrf_exempt
 import json
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from users.models import Perfil
+from .serializers import PerfilSerializer
+from rest_framework import status
 
 # Create your views here.
 @csrf_exempt    
@@ -53,3 +58,23 @@ def register_view(request):
             print("HE entrar a l'else")
             response_data = {'success': True, 'message': 'Soc dins else.'}
             return JsonResponse(response_data)
+
+
+@api_view(['PUT'])
+def edit_perfil(request, cif):
+    try:
+        perfil = Perfil.objects.get(CIF = cif)
+    except Perfil.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'PUT':
+        data_cif = json.dumps(request.data.get('CIF')).strip('"').strip()
+        if (len(data_cif) == 9 and not data_cif[0].isnumeric() and not data_cif[8].isnumeric() and data_cif[1:7].isnumeric()):
+            serializer = PerfilSerializer(perfil, data=request.data, partial= True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                print(serializer.error_messages)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)

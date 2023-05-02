@@ -1,6 +1,10 @@
 # Create your models here.
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.contrib.auth.models import User
+from licitacions.models import Localitzacio
+from phonenumber_field.modelfields import PhoneNumberField
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -33,3 +37,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+
+class Perfil(models.Model):
+    CIF = models.TextField(primary_key=True, max_length=10)
+    tipus_id = models.TextField(null=False)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    descripcio = models.TextField(null=True)
+    localitzacio = models.ForeignKey(Localitzacio, on_delete=models.CASCADE, null=True, blank=True)
+    cp = models.TextField(null=True)
+    telefon = models.TextField(null=False)
+    idioma = models.TextField(null=False)
