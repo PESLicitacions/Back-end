@@ -3,16 +3,39 @@ from licitacions import models
 
 class LicitacioPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
+    favorit = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Licitacio
-        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte')
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit')
+    
+    def get_favorit(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
 
 class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
+    favorit = serializers.SerializerMethodField()
+
     class Meta:
         model = models.LicitacioPublica
-        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte')
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit')
+    
+    def get_favorit(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
 
 
 class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
@@ -20,21 +43,54 @@ class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
     ambit = serializers.StringRelatedField(many=False)
     departament = serializers.StringRelatedField(many=False)
     organ = serializers.StringRelatedField(many=False)
+    favorit = serializers.SerializerMethodField()
     class Meta:
         model = models.LicitacioPublica
         fields = '__all__'
+    
+    def get_favorit(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
 
 
 class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
+    favorit = serializers.SerializerMethodField()
     class Meta:
         model = models.LicitacioPrivada
-        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte')
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit')
+    
+    def get_favorit(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
 
 
 class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
+    favorit = serializers.SerializerMethodField()
     class Meta:
         model = models.LicitacioPrivada
         fields = '__all__'
+    
+    def get_favorit(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
 
 
 class LocalitzacioInfoSerializer(serializers.ModelSerializer):
