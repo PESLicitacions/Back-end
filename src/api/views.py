@@ -194,7 +194,7 @@ class AmbitsInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Ambit.objects.all()
+        queryset = Ambit.objects.all().order_by('nom')
 
         ambit = self.request.query_params.get('ambit')
         if ambit is not None:
@@ -207,7 +207,7 @@ class DepartamentsInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Departament.objects.all()
+        queryset = Departament.objects.all().order_by('nom')
 
         departament = self.request.query_params.get('departament')
         if departament is not None:
@@ -220,7 +220,7 @@ class OrgansInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Organ.objects.all()
+        queryset = Organ.objects.all().order_by('nom')
 
         organ = self.request.query_params.get('organ')
         if organ is not None:
