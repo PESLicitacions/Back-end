@@ -181,7 +181,7 @@ class LocalitzacionsInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Localitzacio.objects.all()
+        queryset = Localitzacio.objects.all().order_by('nom')
 
         localitzacio = self.request.query_params.get('lloc_execucio')
         if localitzacio is not None:
@@ -233,7 +233,7 @@ class TipusContracteInfo(generics.ListAPIView):
     pagination_class = None
     
     def get_queryset(self):
-        queryset = TipusContracte.objects.all()
+        queryset = TipusContracte.objects.all().order_by('tipus_contracte')
 
         tipus_contracte = self.request.query_params.get('tipus_contracte')
         if tipus_contracte is not None:
