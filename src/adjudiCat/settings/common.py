@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     
     #django rest API apps
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     
     #apps
@@ -82,7 +83,15 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated', 
+    ]
 }
 
 WSGI_APPLICATION = 'adjudiCat.wsgi.application'
@@ -110,6 +119,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "rest_framework.authentication.TokenAuthentication",
+   #"allauth.account.auth_backends.AuthenticationBackend"
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

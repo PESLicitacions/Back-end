@@ -8,6 +8,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from licitacions.models import *
 from licitacions.serializers import *
 
+from adjudiCat.authentication import CustomAuthentication
+
 
 class LicitacionsList(generics.ListAPIView):
     serializer_class = LicitacioPreviewSerializer
@@ -240,8 +242,25 @@ class TipusContracteInfo(generics.ListAPIView):
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
 
-
+'''
+class Add_to_favorites(APIView):
+    
+    def post(self,request, pk):
+        user = request.user
+        licitacio = get_object_or_404(Licitacio, pk=pk)
+        favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
+        if favorit:
+            favorit.delete()
+            response_data = {'action': 'deleted', 'success': True}
+        else:
+            favorit = ListaFavorits(user=user, licitacio=licitacio)
+            favorit.save()
+            response_data = {'action': 'added', 'success': True}
+        return JsonResponse(response_data)
+        '''
+     
 def add_to_favorites(request, pk):
+    
     user = request.user
     licitacio = get_object_or_404(Licitacio, pk=pk)
 
