@@ -12,9 +12,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
-from django.contrib.auth.models import User
-from licitacions.models import Localitzacio
-from phonenumber_field.modelfields import PhoneNumberField
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -39,6 +37,9 @@ class CustomUserManager(BaseUserManager):
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+
+from django.contrib.auth.models import User
+from licitacions.models import Localitzacio
 
 
 class CustomUserManager(BaseUserManager):

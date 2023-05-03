@@ -159,9 +159,19 @@ class UserLoginAPI(APIView):
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+import json
 
 from users.serializers import UserSerializer
 from users.permissions import IsCreationOrIsAuthenticated
+from users.models import Perfil
+from .serializers import PerfilSerializer
+from rest_framework.decorators import authentication_classes, permission_classes
+
+
 
 # Create your views here.
 
@@ -175,12 +185,9 @@ class UserViewSet(viewsets.ModelViewSet):
     
 
     
-
-    
-    
-
-
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 def edit_perfil(request, cif):
     try:
         perfil = Perfil.objects.get(CIF = cif)

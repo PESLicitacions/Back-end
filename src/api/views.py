@@ -3,12 +3,15 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 
 from licitacions.models import *
 from licitacions.serializers import *
 
-from adjudiCat.authentication import CustomAuthentication
+
 
 
 class LicitacionsList(generics.ListAPIView):
@@ -52,6 +55,7 @@ class LicitacionsList(generics.ListAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
+
 
 
 class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -133,6 +137,7 @@ class LicitacionsPubliquesList(generics.ListAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
+
 
 
 class LicitacionsPrivadesList(generics.ListCreateAPIView):
@@ -259,6 +264,8 @@ class Add_to_favorites(APIView):
         return JsonResponse(response_data)
         '''
      
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 def add_to_favorites(request, pk):
     
     user = request.user
@@ -275,6 +282,8 @@ def add_to_favorites(request, pk):
     return JsonResponse(response_data)
 
 
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 def add_to_preferences(request, pk):
     user = request.user
     tipus_contracte = get_object_or_404(TipusContracte, pk=pk)
