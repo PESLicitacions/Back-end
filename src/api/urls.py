@@ -2,6 +2,8 @@ from django.urls import path
 from api.views import *
 from users.views import UserViewSet
 from rest_framework.authtoken.views import obtain_auth_token
+from . import views
+from users.views import edit_perfil
 
 from rest_framework import routers
 
@@ -20,5 +22,6 @@ urlpatterns = [
     path('organs', OrgansInfo.as_view()),
     path('tipus_contracte', TipusContracteInfo.as_view()),
     path('auth/', obtain_auth_token),
-
+    path('tipus_contracte/<int:pk>/add-to-preferences', add_to_preferences),
+    path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
 ] + router.urls

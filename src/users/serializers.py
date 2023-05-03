@@ -51,7 +51,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
         '''
+from rest_framework import serializers
+from users.models import Perfil
+
+class PerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perfil
+        fields = '__all__'
+
         
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 

@@ -183,7 +183,7 @@ class LocalitzacionsInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Localitzacio.objects.all()
+        queryset = Localitzacio.objects.all().order_by('nom')
 
         localitzacio = self.request.query_params.get('lloc_execucio')
         if localitzacio is not None:
@@ -196,7 +196,7 @@ class AmbitsInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Ambit.objects.all()
+        queryset = Ambit.objects.all().order_by('nom')
 
         ambit = self.request.query_params.get('ambit')
         if ambit is not None:
@@ -209,7 +209,7 @@ class DepartamentsInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Departament.objects.all()
+        queryset = Departament.objects.all().order_by('nom')
 
         departament = self.request.query_params.get('departament')
         if departament is not None:
@@ -222,7 +222,7 @@ class OrgansInfo(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Organ.objects.all()
+        queryset = Organ.objects.all().order_by('nom')
 
         organ = self.request.query_params.get('organ')
         if organ is not None:
@@ -235,7 +235,7 @@ class TipusContracteInfo(generics.ListAPIView):
     pagination_class = None
     
     def get_queryset(self):
-        queryset = TipusContracte.objects.all()
+        queryset = TipusContracte.objects.all().order_by('tipus_contracte')
 
         tipus_contracte = self.request.query_params.get('tipus_contracte')
         if tipus_contracte is not None:
@@ -267,9 +267,24 @@ def add_to_favorites(request, pk):
     favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
     if favorit:
         favorit.delete()
-        response_data = {'action': 'deleted', 'success': True}
+        response_data = {'licitacio': pk, 'user': user.id, 'action': 'deleted from favorites', 'success': True}
     else:
         favorit = ListaFavorits(user=user, licitacio=licitacio)
         favorit.save()
-        response_data = {'action': 'added', 'success': True}
+        response_data = {'licitacio': pk, 'user': user.id, 'action': 'added to favorites', 'success': True}
+    return JsonResponse(response_data)
+
+
+def add_to_preferences(request, pk):
+    user = request.user
+    tipus_contracte = get_object_or_404(TipusContracte, pk=pk)
+
+    preference = Preference.objects.filter(user=user, tipus_contracte=tipus_contracte).first()
+    if preference:
+        preference.delete()
+        response_data = {'tipus_contracte': pk, 'user': user.id, 'action': 'deleted from preferences', 'success': True}
+    else:
+        preference = Preference(user=user, tipus_contracte=tipus_contracte)
+        preference.save()
+        response_data = {'tipus_contracte': pk, 'user': user.id, 'action': 'added to preferences', 'success': True}
     return JsonResponse(response_data)

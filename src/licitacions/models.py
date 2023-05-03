@@ -95,3 +95,14 @@ class ListaFavorits(models.Model):
                 fields=['user', 'licitacio'], name='unique_favorits'
             )
         ]
+
+
+class Preference(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='preference')
+    tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="preference", null=True, on_delete=models.CASCADE)    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'tipus_contracte'], name='unique_preference'
+            )
+        ]
