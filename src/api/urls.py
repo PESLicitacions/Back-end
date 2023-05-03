@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from users.views import register_view, login_view, edit_perfil
+from publicdata.views import get_data
 
 
 urlpatterns = [
@@ -18,5 +19,5 @@ urlpatterns = [
     path('register/', register_view, name='register'), 
     path('login/', login_view, name='login'),
     path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
-
+    path('updateBD/', get_data, name='update_BD'),
 ]
