@@ -6,10 +6,12 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.views import APIView
 
 
 from licitacions.models import *
 from licitacions.serializers import *
+from users.models import CustomUser
 
 
 
@@ -247,8 +249,10 @@ class TipusContracteInfo(generics.ListAPIView):
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
 
-'''
+
 class Add_to_favorites(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
     
     def post(self,request, pk):
         user = request.user
@@ -256,30 +260,32 @@ class Add_to_favorites(APIView):
         favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
         if favorit:
             favorit.delete()
-            response_data = {'action': 'deleted', 'success': True}
+            response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from favorites', 'success': True}
         else:
             favorit = ListaFavorits(user=user, licitacio=licitacio)
             favorit.save()
-            response_data = {'action': 'added', 'success': True}
+            response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
-        '''
-     
+
+
+'''  
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def add_to_favorites(request, pk):
     
-    user = request.user
+    user = CustomUser.objects.get(email="20@gmail.com")
     licitacio = get_object_or_404(Licitacio, pk=pk)
 
     favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
     if favorit:
         favorit.delete()
-        response_data = {'licitacio': pk, 'user': user.id, 'action': 'deleted from favorites', 'success': True}
+        response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from favorites', 'success': True}
     else:
         favorit = ListaFavorits(user=user, licitacio=licitacio)
         favorit.save()
-        response_data = {'licitacio': pk, 'user': user.id, 'action': 'added to favorites', 'success': True}
+        response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
     return JsonResponse(response_data)
+'''
 
 
 @permission_classes([IsAuthenticated])

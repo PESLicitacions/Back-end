@@ -164,6 +164,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 import json
+from rest_framework.authtoken.models import Token
 
 from users.serializers import UserSerializer
 from users.permissions import IsCreationOrIsAuthenticated
@@ -182,6 +183,8 @@ class UserViewSet(viewsets.ModelViewSet):
     
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsCreationOrIsAuthenticated,)
+        
+    
     
 
     
