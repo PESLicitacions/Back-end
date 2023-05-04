@@ -25,7 +25,6 @@ class LicitacionsList(generics.ListAPIView):
         localitzacio = self.request.query_params.get('lloc_execucio')
         if localitzacio is not None:
             queryset = queryset.filter(lloc_execucio__nom__icontains=localitzacio)
-            #queryset = queryset.filter(lloc_execucio_id=localitzacio)
 
         pressupost_min = self.request.query_params.get('pressupost_min')
         if pressupost_min is not None:
@@ -37,7 +36,6 @@ class LicitacionsList(generics.ListAPIView):
         
         tipus_contracte = self.request.query_params.get('tipus_contracte')
         if tipus_contracte is not None:
-            #queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
             queryset = queryset.filter(tipus_contracte_id=tipus_contracte)
         
         duracio_min = self.request.query_params.get('duracio_min')
@@ -92,7 +90,6 @@ class LicitacionsPubliquesList(generics.ListAPIView):
         localitzacio = self.request.query_params.get('lloc_execucio')
         if localitzacio is not None:
             queryset = queryset.filter(lloc_execucio__nom__icontains=localitzacio)
-            #queryset = queryset.filter(lloc_execucio_id=localitzacio)
 
         pressupost_min = self.request.query_params.get('pressupost_min')
         if pressupost_min is not None:
@@ -119,7 +116,6 @@ class LicitacionsPubliquesList(generics.ListAPIView):
         
         tipus_contracte = self.request.query_params.get('tipus_contracte')
         if tipus_contracte is not None:
-            #queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
             queryset = queryset.filter(tipus_contracte_id=tipus_contracte)
         
         duracio_min = self.request.query_params.get('duracio_min')
@@ -151,7 +147,6 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
         localitzacio = self.request.query_params.get('lloc_execucio')
         if localitzacio is not None:
             queryset = queryset.filter(lloc_execucio__nom__icontains=localitzacio)
-            #queryset = queryset.filter(lloc_execucio_id=localitzacio)
 
         pressupost_min = self.request.query_params.get('pressupost_min')
         if pressupost_min is not None:
@@ -163,7 +158,6 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
         
         tipus_contracte = self.request.query_params.get('tipus_contracte')
         if tipus_contracte is not None:
-            #queryset = queryset.filter(Q(tipus_contracte__tipus_contracte__icontains=tipus_contracte) | Q(tipus_contracte__subtipus_contracte__icontains=tipus_contracte))
             queryset = queryset.filter(tipus_contracte_id=tipus_contracte)
         
         duracio_min = self.request.query_params.get('duracio_min')
@@ -266,26 +260,6 @@ class Add_to_favorites(APIView):
             favorit.save()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
-
-
-'''  
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
-def add_to_favorites(request, pk):
-    
-    user = CustomUser.objects.get(email="20@gmail.com")
-    licitacio = get_object_or_404(Licitacio, pk=pk)
-
-    favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
-    if favorit:
-        favorit.delete()
-        response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from favorites', 'success': True}
-    else:
-        favorit = ListaFavorits(user=user, licitacio=licitacio)
-        favorit.save()
-        response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
-    return JsonResponse(response_data)
-'''
 
 
 @permission_classes([IsAuthenticated])
