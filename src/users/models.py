@@ -37,8 +37,11 @@ class CustomUserManager(BaseUserManager):
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.conf import settings
+
 
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 from licitacions.models import Localitzacio
 
 
@@ -79,3 +82,14 @@ class Perfil(models.Model):
     cp = models.TextField(null=True)
     telefon = models.TextField(null=False)
     idioma = models.TextField(null=False)
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='follower')
+    following = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='following')
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['follower', 'following'], name='unique_follow'
+            )
+        ]

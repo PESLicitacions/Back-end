@@ -1,6 +1,6 @@
 from django.urls import path
 from api.views import *
-from users.views import UserViewSet
+from users.views import *
 from rest_framework.authtoken.views import obtain_auth_token
 from . import views
 from publicdata.views import get_data
@@ -24,6 +24,7 @@ urlpatterns = [
     path('organs', OrgansInfo.as_view()),
     path('tipus_contracte', TipusContracteInfo.as_view()),
     path('login/', obtain_auth_token),
+    path('users/<int:pk>/follow', follow.as_view()),
     path('tipus_contracte/<int:pk>/add-to-preferences', add_to_preferences),
     path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
