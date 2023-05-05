@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
+from requests import Response
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.pagination import LimitOffsetPagination
@@ -177,6 +178,17 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
+    
+
+class LicitacionsFavoritesList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        favorits = ListaFavorits.objects.filter(user=user).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=favorits)
 
 
 class LocalitzacionsInfo(generics.ListAPIView):
