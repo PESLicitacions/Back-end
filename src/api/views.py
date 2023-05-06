@@ -190,6 +190,15 @@ class LicitacionsFavoritesList(generics.ListAPIView):
         favorits = ListaFavorits.objects.filter(user=user).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=favorits)
 
+class LicitacionsFollowList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        favorits = ListaFollow.objects.filter(user=user).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=favorits)
 
 class LocalitzacionsInfo(generics.ListAPIView):
     serializer_class = LocalitzacioInfoSerializer
@@ -273,6 +282,22 @@ class Add_to_favorites(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
 
+class Add_to_follow(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def post(self,request, pk):
+        user = request.user
+        licitacio = get_object_or_404(Licitacio, pk=pk)
+        follow = ListaFollow.objects.filter(user=user, licitacio=licitacio).first()
+        if follow:
+            follow.delete()
+            response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from follow', 'success': True}
+        else:
+            follow = ListaFollow(user=user, licitacio=licitacio)
+            follow.save()
+            response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to follow', 'success': True}
+        return JsonResponse(response_data)
 
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])

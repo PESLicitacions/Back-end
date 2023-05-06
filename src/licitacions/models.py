@@ -96,6 +96,15 @@ class ListaFavorits(models.Model):
             )
         ]
 
+class ListaFollow(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='follow')
+    licitacio = models.ForeignKey(Licitacio, on_delete=models.CASCADE, null=True, blank=True, related_name='follow')
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'licitacio'], name='unique_follow'
+            )
+        ]
 
 class Preference(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='preference')
