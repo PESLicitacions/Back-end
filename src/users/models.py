@@ -45,6 +45,7 @@ from licitacions.models import Localitzacio
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
+            print("asdfasdfasdasdf")
             raise ValueError('Email can not be null.')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
@@ -57,8 +58,8 @@ class CustomUser(AbstractUser):
     pass
 
     #custom fields
-    email = models.EmailField(verbose_name='email address', unique=True)
-    username = None
+    email = models.EmailField(verbose_name='email address', unique=True, blank=False)
+    username = models.TextField(max_length=30, unique=True, blank=False)
     name = models.CharField(max_length=30, blank=True)
     phone = models.CharField(max_length=310, blank=True)
     

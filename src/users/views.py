@@ -165,12 +165,18 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 import json
 from rest_framework.authtoken.models import Token
+from django.views.decorators.csrf import csrf_exempt
 
 from users.serializers import UserSerializer
 from users.permissions import IsCreationOrIsAuthenticated
 from users.models import Perfil
 from .serializers import PerfilSerializer
 from rest_framework.decorators import authentication_classes, permission_classes
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+
 
 
 
@@ -208,3 +214,30 @@ def edit_perfil(request, cif):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)
+
+@authentication_classes([TokenAuthentication])
+@csrf_exempt  
+def login_view(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'success': True})
+    else:
+        if request.method == 'POST':
+            print("asdfasdfasd")
+            data = json.loads(request.body)
+            email = data.get('email')
+            password = data.get('password')
+            print(email)
+            UserModel = get_user_model()
+            try:
+                user = UserModel.objects.get(email=email)
+                user2 = authenticate(request, username=user.get_username, password=password)
+            except UserModel.DoesNotExist:
+                response_data = {'success': False, 'message': 'Email or password incorrect'}
+            else:
+                print(user2)
+                if user2 is not None:
+                    login(request, user)
+                    response_data = {'success': True}
+                else:
+                    response_data = {'success': False, 'message': 'Email or password incorrect'}
+            return JsonResponse(response_data)

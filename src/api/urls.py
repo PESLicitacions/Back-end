@@ -4,7 +4,7 @@ from users.views import UserViewSet
 from rest_framework.authtoken.views import obtain_auth_token
 from . import views
 from publicdata.views import get_data
-from users.views import edit_perfil
+from users.views import edit_perfil, login_view
 
 from rest_framework import routers
 
@@ -27,4 +27,5 @@ urlpatterns = [
     path('tipus_contracte/<int:pk>/add-to-preferences', add_to_preferences),
     path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
+    path('login-user/', login_view, name='login_view'),
 ] + router.urls
