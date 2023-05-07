@@ -298,7 +298,7 @@ class Add_to_follow(APIView):
             follow.save()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to follow', 'success': True}
         return JsonResponse(response_data)
-
+    
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def add_to_preferences(request, pk):
