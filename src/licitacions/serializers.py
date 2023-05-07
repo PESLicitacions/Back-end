@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from licitacions import models
+from .models import ListaFavorits
 
 class LicitacioPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
@@ -125,3 +126,9 @@ class TipusContracteInfoSerializer(serializers.ModelSerializer):
     
     def get_contracte_str(self, obj):
         return str(obj)
+
+
+class ListaFavoritsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListaFavorits
+        fields = '__all__'
