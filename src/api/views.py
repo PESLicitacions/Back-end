@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 
 from licitacions.models import *
+from users.models import *
 from licitacions.serializers import *
 from users.models import CustomUser
 
@@ -189,6 +190,17 @@ class LicitacionsFavoritesList(generics.ListAPIView):
         user = self.request.user
         favorits = ListaFavorits.objects.filter(user=user).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=favorits)
+
+
+class LicitacionsFollowingList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPrivadaPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        following = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
+        return LicitacioPrivada.objects.filter(user__in=following)
 
 
 class LocalitzacionsInfo(generics.ListAPIView):

@@ -16,6 +16,7 @@ urlpatterns = [
     path('licitacions/publiques', LicitacionsPubliquesList.as_view()),
     path('licitacions/privades', LicitacionsPrivadesList.as_view()),
     path('licitacions/favorites', LicitacionsFavoritesList.as_view()),
+    path('licitacions/following', LicitacionsFollowingList.as_view()),
     path('licitacions/<int:pk>/', LicitacioDetailView.as_view()),
     path('licitacions/<int:pk>/add-to-favorites', Add_to_favorites.as_view()),
     path('localitzacions', LocalitzacionsInfo.as_view()),
