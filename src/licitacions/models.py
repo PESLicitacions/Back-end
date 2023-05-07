@@ -89,6 +89,7 @@ class LicitacioPrivada(Licitacio):
 class ListaFavorits(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='favorits')
     licitacio = models.ForeignKey(Licitacio, on_delete=models.CASCADE, null=True, blank=True, related_name='favorits')
+    notificacions = models.BooleanField(default=False)
     class Meta:
         constraints = [
             models.UniqueConstraint(
