@@ -25,6 +25,7 @@ urlpatterns = [
     path('tipus_contracte', TipusContracteInfo.as_view()),
     path('login/', obtain_auth_token),
     path('users/<int:pk>/follow', follow.as_view()),
+    path('users/following', ListFollowing.as_view()),
     path('tipus_contracte/<int:pk>/add-to-preferences', add_to_preferences),
     path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
