@@ -61,8 +61,6 @@ class PerfilSerializer(serializers.ModelSerializer):
         model = Perfil
         fields = '__all__'
 
-        
-
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -75,7 +73,6 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         User = get_user_model()
         try:
-            print("aaaaa")
             user = User.objects.create_user(**validated_data)
         except ValueError as e:
             return JsonResponse({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

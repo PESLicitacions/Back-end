@@ -224,12 +224,12 @@ def login_view(request):
         if request.method == 'POST':
             print("asdfasdfasd")
             data = json.loads(request.body)
-            email = data.get('email')
+            username = data.get('username')
             password = data.get('password')
-            print(email)
+            print(username)
             UserModel = get_user_model()
             try:
-                user = UserModel.objects.get(email=email)
+                user = UserModel.objects.get(email=username)
                 user2 = authenticate(request, username=user.get_username, password=password)
             except UserModel.DoesNotExist:
                 response_data = {'success': False, 'message': 'Email or password incorrect'}

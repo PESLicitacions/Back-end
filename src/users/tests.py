@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.db import IntegrityError
 from django.test import TestCase
 from django.contrib.auth.models import User
 from users.models import Perfil, CustomUser
@@ -129,3 +130,56 @@ class EditUserTest(TestCase):
         self.assertEqual(perfil_actualizado.cp, 'bbbbbb')
         self.assertEqual(perfil_actualizado.telefon, '+34666666666')        
         self.assertEqual(perfil_actualizado.idioma, 'english')
+
+class UserTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user_data = {
+            'email': 'usuariprova@gmail.com',
+            'username': 'usuari1',
+            'password': '12345678t',
+            'name': 'NomUsuari',
+        }
+
+    def test_creadora_usuari(self):
+        response = self.client.post('/api/users/', data=self.user_data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(CustomUser.objects.count(), 1)
+        user = CustomUser.objects.last()
+        self.assertEqual(user.email, self.user_data['email'])
+        self.assertEqual(user.username, self.user_data['username'])
+        self.assertEqual(user.name, self.user_data['name'])
+        self.assertTrue(user.check_password(self.user_data['password']))
+
+    def test_create_user_without_email(self):
+        """Debe lanzar una excepción al intentar crear un usuario sin email"""
+        with self.assertRaises(ValueError) as cm:
+            CustomUser.objects.create_user(email=None, username='username',password='password')
+        self.assertEqual(str(cm.exception), 'Email can not be null.')
+
+    def test_create_user_with_existing_email(self):
+        """Debe lanzar una excepción al intentar crear un usuario con un email existente"""
+        CustomUser.objects.create_user(
+            email=self.user_data['email'], 
+            username='username',
+            password='password'
+        )
+        with self.assertRaises(IntegrityError):
+            CustomUser.objects.create_user(
+                email=self.user_data['email'], 
+                username='username2',
+                password='password2'
+            )
+
+    def test_create_user_with_existing_username(self):
+        CustomUser.objects.create_user(
+            email='email1', 
+            username='username',
+            password='password'
+        )
+        with self.assertRaises(IntegrityError):
+            CustomUser.objects.create_user(
+               email='email1', 
+                username='username',
+                password='password2'
+            )
