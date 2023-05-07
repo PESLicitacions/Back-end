@@ -74,3 +74,10 @@ class UserSerializer(serializers.ModelSerializer):
         User = get_user_model()
         user = User.objects.create_user(**validated_data)
         return user
+    
+
+class UserPreviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        User = get_user_model()
+        model = User
+        fields = ('id', 'username', 'email')

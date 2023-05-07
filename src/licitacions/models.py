@@ -83,7 +83,7 @@ class LicitacioPublica(Licitacio):
 
 
 class LicitacioPrivada(Licitacio):
-    empresa = models.CharField(max_length=150, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='licitacio_privada')
 
 
 class ListaFavorits(models.Model):

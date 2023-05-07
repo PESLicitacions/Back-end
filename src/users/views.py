@@ -156,20 +156,23 @@ class UserLoginAPI(APIView):
     
     '''
 
+from rest_framework import generics
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 import json
 from rest_framework.authtoken.models import Token
 
-from users.serializers import UserSerializer
+from users.serializers import *
 from users.permissions import IsCreationOrIsAuthenticated
-from users.models import Perfil
-from .serializers import PerfilSerializer
+from users.models import *
 from rest_framework.decorators import authentication_classes, permission_classes
 
 
@@ -183,9 +186,49 @@ class UserViewSet(viewsets.ModelViewSet):
     
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsCreationOrIsAuthenticated,)
-        
+
+
+class follow(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
     
+    def post(self,request, pk):
+        User = get_user_model()
+        follower = request.user
+        following = get_object_or_404(User, pk=pk)
+        follows = Follow.objects.filter(follower=follower, following=following).first()
+        if follows:
+            follows.delete()
+            response_data = {'following': following.email, 'user': follower.email, 'action': 'unfollowed', 'success': True}
+        else:
+            follows = Follow(follower=follower, following=following)
+            follows.save()
+            response_data = {'following': following.email, 'user': follower.email, 'action': 'followed', 'success': True}
+        return JsonResponse(response_data)
     
+
+class ListFollowing(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = UserPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        following = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
+        User = get_user_model()
+        return User.objects.filter(id__in=following)
+    
+
+class ListFollowers(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = UserPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        followers = Follow.objects.filter(following=user).values_list('follower_id', flat=True)
+        User = get_user_model()
+        return User.objects.filter(id__in=followers)
 
     
 @api_view(['PUT'])
