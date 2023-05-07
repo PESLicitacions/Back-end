@@ -217,6 +217,18 @@ class ListFollowing(generics.ListAPIView):
         following = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
         User = get_user_model()
         return User.objects.filter(id__in=following)
+    
+
+class ListFollowers(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = UserPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        followers = Follow.objects.filter(following=user).values_list('follower_id', flat=True)
+        User = get_user_model()
+        return User.objects.filter(id__in=followers)
 
     
 @api_view(['PUT'])
