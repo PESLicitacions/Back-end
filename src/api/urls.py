@@ -6,6 +6,7 @@ from . import views
 from publicdata.views import get_data
 from users.views import edit_perfil
 from licitacions.views import unfollow_licitacio, toggle_notification
+from users.views import edit_perfil, login_view
 
 from rest_framework import routers
 
@@ -34,4 +35,5 @@ urlpatterns = [
     path('updateBD/', get_data, name='update_BD'),
     path('unfollow/<int:pk>', unfollow_licitacio, name='unfollow_licitacio'),
     path('notifications/<int:pk>', toggle_notification, name='toggle_notification'),
+    path('login-user/', login_view, name='login_view'),
 ] + router.urls

@@ -1,67 +1,35 @@
 # Create your models here.
-'''
-from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db import models
-
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-
-
-
-class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email or not password or not extra_fields.get('name'):
-            raise ValueError('All the fields must be set')
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save()
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return self.create_user(email, password, **extra_fields)
-'''
-
-
-    
-    
-
+from sqlite3 import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.conf import settings
-
-
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 from licitacions.models import Localitzacio
 
-
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password, **extra_fields):
+    def create_user(self, email, username, password, **extra_fields):
         if not email:
             raise ValueError('Email can not be null.')
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, username=username, **extra_fields)
         user.set_password(password)
-        user.save(using=self._db)
+        try:
+            user.save(using=self._db)
+        except IntegrityError as e:
+            if 'UNIQUE constraint' in str(e) and 'username' in str(e):
+                raise ValueError('Username already exists.')
+            elif 'UNIQUE constraint' in str(e) and 'email' in str(e):
+                raise ValueError('Email already exists.')
+            else:
+                raise e
         return user
-    
-    
+      
 class CustomUser(AbstractUser):
-    pass
-
     #custom fields
-    email = models.EmailField(verbose_name='email address', unique=True)
-    username = None
+    email = models.EmailField(verbose_name='email address', unique=True, blank=False)
+    username = models.TextField(max_length=30, unique=True, blank=False)
     name = models.CharField(max_length=30, blank=True)
     phone = models.CharField(max_length=310, blank=True)
     
@@ -72,7 +40,6 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
     
-
 class Perfil(models.Model):
     CIF = models.TextField(primary_key=True, max_length=10)
     tipus_id = models.TextField(null=False)
