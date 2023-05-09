@@ -234,7 +234,7 @@ class ListFollowers(generics.ListAPIView):
         return User.objects.filter(id__in=followers)
 
     
-@api_view(['PUT'])
+@api_view(['PUT', 'GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def edit_perfil(request, cif):
@@ -254,6 +254,11 @@ def edit_perfil(request, cif):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)
+    
+    if request.method == 'GET':
+        perfil = PerfilSerializer(perfil)
+        return Response(perfil.data)
+
 
 @authentication_classes([TokenAuthentication])
 @csrf_exempt  
