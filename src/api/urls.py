@@ -28,6 +28,7 @@ urlpatterns = [
     path('organs', OrgansInfo.as_view()),
     path('tipus_contracte', TipusContracteInfo.as_view()),
     path('login/', obtain_auth_token),
+    path('delete/', delete_user),
     path('users/<int:pk>/follow', follow.as_view()),
     path('users/following', ListFollowing.as_view()),
     path('users/followers', ListFollowers.as_view()),
