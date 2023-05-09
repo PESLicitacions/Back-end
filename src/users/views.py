@@ -286,3 +286,15 @@ def login_view(request):
                 else:
                     response_data = {'success': False, 'message': 'Email or password incorrect'}
             return JsonResponse(response_data)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def delete_user(request):
+    try:
+        user = request.user
+    except user.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'DELETE':
+        user.delete()
+        return Response({'success': True, 'message': 'Account deleted'})
