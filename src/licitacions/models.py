@@ -98,12 +98,29 @@ class ListaFavorits(models.Model):
         ]
 
 
-class Preference(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='preference')
-    tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="preference", null=True, on_delete=models.CASCADE)    
+class PreferenceTipusContracte(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="preference_tipus_contracte")
+    tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="preference_tipus_contracte", null=True, on_delete=models.CASCADE)    
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'tipus_contracte'], name='unique_preference'
+                fields=['user', 'tipus_contracte'], name='unique_preference_tipus_contracte'
             )
         ]
+
+
+class PreferenceAmbit(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="preference_ambit")
+    ambit = models.ForeignKey(Ambit, to_field='codi', related_name="preference_ambit", null=True, on_delete=models.CASCADE)    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'ambit'], name='unique_preference_ambit'
+            )
+        ]
+
+
+class PreferencePressupost(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="preference_pressupost", primary_key=True)
+    pressupost_min = models.DecimalField(decimal_places=2, max_digits=100, null=True)    
+    pressupost_max = models.DecimalField(decimal_places=2, max_digits=100, null=True)

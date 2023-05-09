@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from requests import Response
 from rest_framework import generics
 from django.db.models import Q
@@ -201,6 +202,39 @@ class LicitacionsFollowingList(generics.ListAPIView):
         user = self.request.user
         following = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
         return LicitacioPrivada.objects.filter(user__in=following)
+    
+
+class LicitacionsPreferencesList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        tp_preferences = PreferenceTipusContracte.objects.filter(user=user).values_list('tipus_contracte', flat=True)
+        ambit_preferences = PreferenceAmbit.objects.filter(user=user).values_list('ambit', flat=True)
+        lic_pub_ids = LicitacioPublica.objects.filter(ambit__in=ambit_preferences).values_list('licitacio_ptr_id', flat=True)
+        pressupost_preferences = PreferencePressupost.objects.filter(user=user).first()
+
+
+        queryset = Licitacio.objects.filter(id__in=lic_pub_ids)
+
+        queryset = queryset | Licitacio.objects.filter(tipus_contracte__in=tp_preferences)
+
+
+        if pressupost_preferences:
+            if pressupost_preferences.pressupost_min is not None and pressupost_preferences.pressupost_max is None:
+                q = Q(pressupost__gte=pressupost_preferences.pressupost_min)
+            elif pressupost_preferences.pressupost_min is None and pressupost_preferences.pressupost_max is not None:
+                q = Q(pressupost__lte=pressupost_preferences.pressupost_max)
+            elif pressupost_preferences.pressupost_min is not None and pressupost_preferences.pressupost_max is not None:
+                q = Q(pressupost__gte=pressupost_preferences.pressupost_min, pressupost__lte=pressupost_preferences.pressupost_max)
+            
+            queryset = queryset | Licitacio.objects.filter(q)
+
+
+        return queryset
 
 
 class LocalitzacionsInfo(generics.ListAPIView):
@@ -286,18 +320,62 @@ class Add_to_favorites(APIView):
         return JsonResponse(response_data)
 
 
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
-def add_to_preferences(request, pk):
-    user = request.user
-    tipus_contracte = get_object_or_404(TipusContracte, pk=pk)
+class Add_to_preferences(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
 
-    preference = Preference.objects.filter(user=user, tipus_contracte=tipus_contracte).first()
-    if preference:
-        preference.delete()
-        response_data = {'tipus_contracte': pk, 'user': user.id, 'action': 'deleted from preferences', 'success': True}
-    else:
-        preference = Preference(user=user, tipus_contracte=tipus_contracte)
-        preference.save()
-        response_data = {'tipus_contracte': pk, 'user': user.id, 'action': 'added to preferences', 'success': True}
-    return JsonResponse(response_data)
+    def post(self, request):
+        user = request.user
+
+        tipus_contracte_ids = request.query_params.get('tipus_contracte')
+        PreferenceTipusContracte.objects.filter(user=user).delete()
+        if tipus_contracte_ids is not None and tipus_contracte_ids != "":
+            tipus_contracte_ids = [int(id) for id in tipus_contracte_ids.split(',')]
+            for tipus_contracte_id in tipus_contracte_ids:
+                tipus_contracte = get_object_or_404(TipusContracte, id=tipus_contracte_id)
+                preference_tp = PreferenceTipusContracte(user=user, tipus_contracte=tipus_contracte)
+                try:
+                    preference_tp.save()
+                except:
+                    pass
+
+        ambit_ids = request.query_params.get('ambit')
+        PreferenceAmbit.objects.filter(user=user).delete()
+        if ambit_ids is not None and ambit_ids != "":
+            ambit_ids = [int(id) for id in ambit_ids.split(',')]
+            for ambit_id in ambit_ids:
+                ambit = get_object_or_404(Ambit, codi=ambit_id)
+                preference_amb = PreferenceAmbit(user=user, ambit=ambit)
+                try:
+                    preference_amb.save()
+                except:
+                    pass
+        
+        pressupost_min = request.query_params.get('pressupost_min')
+        pressupost_max = request.query_params.get('pressupost_max')
+        PreferencePressupost.objects.filter(user=user).delete()
+        if pressupost_min is not None or pressupost_max is not None:
+            preference_press = PreferencePressupost(user=user, pressupost_min=pressupost_min, pressupost_max=pressupost_max)
+            try:
+                preference_press.save()
+            except:
+                pass
+
+        return JsonResponse({'status': 'ok'})
+    
+    def get(self, request):
+        user = request.user
+
+        tipus_contracte_preferences = PreferenceTipusContracte.objects.filter(user=user)
+        tipus_contracte_data = [{"id": p.tipus_contracte.id, "name": str(p.tipus_contracte)} for p in tipus_contracte_preferences]
+
+        ambit_preferences = PreferenceAmbit.objects.filter(user=user)
+        ambit_data = [{"id": p.ambit.codi, "name": p.ambit.nom} for p in ambit_preferences]
+
+        pressupost_preference = PreferencePressupost.objects.filter(user=user).first()
+        pressupost_data = {"pressupost_min": pressupost_preference.pressupost_min if pressupost_preference else None,
+                           "pressupost_max": pressupost_preference.pressupost_max if pressupost_preference else None}
+
+        return JsonResponse({"tipus_contracte": tipus_contracte_data,
+                             "ambit": ambit_data,
+                             "pressupost": pressupost_data})
