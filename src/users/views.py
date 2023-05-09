@@ -190,7 +190,6 @@ class UserViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsCreationOrIsAuthenticated,)
 
-
 class follow(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -234,7 +233,7 @@ class ListFollowers(generics.ListAPIView):
         return User.objects.filter(id__in=followers)
 
     
-@api_view(['PUT'])
+@api_view(['PUT', 'GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def edit_perfil(request, cif):
@@ -254,30 +253,41 @@ def edit_perfil(request, cif):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)
+    
+    if request.method == 'GET':
+        perfil = PerfilSerializer(perfil)
+        return Response(perfil.data)
 
+
+@api_view(['POST'])
 @authentication_classes([TokenAuthentication])
-@csrf_exempt  
 def login_view(request):
     if request.user.is_authenticated:
         return JsonResponse({'success': True})
+
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    if not (email and password):
+        return JsonResponse({'success': False, 'message': 'Email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = authenticate(request, email=email, password=password)
+
+    if user is not None:
+        login(request, user)
+        return JsonResponse({'success': True})
     else:
-        if request.method == 'POST':
-            print("asdfasdfasd")
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
-            print(username)
-            UserModel = get_user_model()
-            try:
-                user = UserModel.objects.get(email=username)
-                user2 = authenticate(request, username=user.get_username, password=password)
-            except UserModel.DoesNotExist:
-                response_data = {'success': False, 'message': 'Email or password incorrect'}
-            else:
-                print(user2)
-                if user2 is not None:
-                    login(request, user)
-                    response_data = {'success': True}
-                else:
-                    response_data = {'success': False, 'message': 'Email or password incorrect'}
-            return JsonResponse(response_data)
+        print(f"Authentication failed for email: {email}")
+        return JsonResponse({'success': False, 'message': 'Email or password incorrect.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def delete_user(request):
+    try:
+        user = request.user
+    except user.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'DELETE':
+        user.delete()
+        return Response({'success': True, 'message': 'Account deleted'})
