@@ -199,8 +199,8 @@ class LicitacionsFollowingList(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        following = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
-        return LicitacioPrivada.objects.filter(user__in=following)
+        favorits = ListaFavorits.objects.filter(user=user, notificacions = True).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=favorits)
 
 
 class LocalitzacionsInfo(generics.ListAPIView):
