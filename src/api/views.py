@@ -190,6 +190,7 @@ class LicitacionsFavoritesList(generics.ListAPIView):
         user = self.request.user
         favorits = ListaFavorits.objects.filter(user=user).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=favorits)
+
     
 class LicitacionsSeguidesList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
