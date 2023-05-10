@@ -280,6 +280,14 @@ def login_view(request):
         print(f"Authentication failed for email: {email}")
         return JsonResponse({'success': False, 'message': 'Email or password incorrect.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+def logout_view(request):
+    logout(request)
+    return Response({'success': True, 'message': 'Logout completed'})
+
+
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
