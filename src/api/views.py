@@ -83,7 +83,6 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
         else:
             return self.serializer_class
 
-
 class LicitacionsPubliquesList(generics.ListAPIView):
     serializer_class = LicitacioPublicaPreviewSerializer
     
@@ -180,6 +179,7 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
+   
     
 
 class LicitacionsFavoritesList(generics.ListAPIView):
@@ -192,6 +192,16 @@ class LicitacionsFavoritesList(generics.ListAPIView):
         favorits = ListaFavorits.objects.filter(user=user).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=favorits)
 
+    
+class LicitacionsSeguidesList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        seguint = ListaFavorits.objects.filter(user=user, notificacions = True).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=seguint)
 
 class LicitacionsFollowingList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
@@ -310,6 +320,16 @@ class TipusContracteInfo(generics.ListAPIView):
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
 
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    def get_queryset(self):
+        queryset = None
+        cif = self.kwargs.get('cif')
+        user = Perfil.objects.get(CIF = cif)
+        if user.exists():
+            queryset = LicitacioPublica.objects.all()
+        else:
+            queryset = LicitacioPrivada.objects.all()
+        return queryset
 
 class Add_to_favorites(APIView):
     authentication_classes(IsAuthenticated,)
@@ -328,23 +348,23 @@ class Add_to_favorites(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
 
-class Add_to_following(APIView):
+class Seguir(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
     
     def post(self,request, pk):
         user = request.user
         licitacio = get_object_or_404(Licitacio, pk=pk)
-        following = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
-        if following:
-            if following.notificacions == True:
-                following.notificacions=False
-                following.save()
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from following', 'success': True}
+        seguir = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
+        if seguir:
+            if seguir.notificacions == True:
+                seguir.notificacions=False
+                seguir.save()
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Deixant de seguir licitacio', 'success': True}
             else:
-                following.notificacions=True
-                following.save() 
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to following', 'success': True}
+                seguir.notificacions=True
+                seguir.save() 
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Seguint licitacio', 'success': True}
         else:
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'First add it to favorites', 'success': False}
         
