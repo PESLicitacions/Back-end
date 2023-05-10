@@ -22,7 +22,7 @@ urlpatterns = [
     path('licitacions/following', LicitacionsFollowingList.as_view()),
     path('licitacions/<int:pk>/', LicitacioDetailView.as_view()),
     path('licitacions/<int:pk>/add-to-favorites', Add_to_favorites.as_view()),
-    path('licitacions/<int:pk>/add-to-following', Add_to_seguir.as_view()),
+    path('licitacions/<int:pk>/add-to-seguides', Add_to_seguides.as_view()),
     path('localitzacions', LocalitzacionsInfo.as_view()),
     path('ambits', AmbitsInfo.as_view()),
     path('departaments', DepartamentsInfo.as_view()),

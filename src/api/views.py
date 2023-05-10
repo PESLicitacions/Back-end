@@ -304,7 +304,7 @@ class Add_to_favorites(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
 
-class Add_to_seguint(APIView):
+class Add_to_seguides(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
     
