@@ -216,6 +216,7 @@ class LicitacionsPreferencesList(generics.ListAPIView):
         ambit_preferences = PreferenceAmbit.objects.filter(user=user).values_list('ambit', flat=True)
         lic_pub_ids = LicitacioPublica.objects.filter(ambit__in=ambit_preferences).values_list('licitacio_ptr_id', flat=True)
         pressupost_preferences = PreferencePressupost.objects.filter(user=user).first()
+        tl_preferences = PreferenceTipusLicitacio.objects.filter(user=user).first()
 
 
         queryset = Licitacio.objects.filter(id__in=lic_pub_ids)
@@ -233,6 +234,14 @@ class LicitacionsPreferencesList(generics.ListAPIView):
             
             queryset = queryset | Licitacio.objects.filter(q)
 
+        if tl_preferences:
+            if tl_preferences.privades:
+                ids_privades = LicitacioPrivada.objects.all().values_list('licitacio_ptr_id', flat=True)
+                queryset = queryset | Licitacio.objects.filter(id__in=ids_privades)
+            
+            if tl_preferences.publiques:
+                ids_publiques = LicitacioPublica.objects.all().values_list('licitacio_ptr_id', flat=True)
+                queryset = queryset | Licitacio.objects.filter(id__in=ids_publiques)
 
         return queryset
 
@@ -381,6 +390,22 @@ class Add_to_preferences(APIView):
                 preference_press.save()
             except:
                 pass
+        
+        privades = request.query_params.get('privades')
+        print(privades)
+        publiques = request.query_params.get('publiques')
+        print(publiques)
+        PreferenceTipusLicitacio.objects.filter(user=user).delete()
+        if privades is not None or publiques is not None:
+            if privades is None:
+                privades = False
+            if publiques is None:
+                publiques = False
+            preference_tipus_lic = PreferenceTipusLicitacio(user=user, privades=privades, publiques=publiques)
+            try:
+                preference_tipus_lic.save()
+            except:
+                pass
 
         return JsonResponse({'status': 'ok'})
     
@@ -397,6 +422,11 @@ class Add_to_preferences(APIView):
         pressupost_data = {"pressupost_min": pressupost_preference.pressupost_min if pressupost_preference else None,
                            "pressupost_max": pressupost_preference.pressupost_max if pressupost_preference else None}
 
+        tipus_lic_preference = PreferenceTipusLicitacio.objects.filter(user=user).first()
+        tipus_lic_data = {"privades": tipus_lic_preference.privades if tipus_lic_preference else False,
+                          "publiques": tipus_lic_preference.publiques if tipus_lic_preference else False}
+
         return JsonResponse({"tipus_contracte": tipus_contracte_data,
                              "ambit": ambit_data,
-                             "pressupost": pressupost_data})
+                             "pressupost": pressupost_data,
+                             "tipus_licitacio": tipus_lic_data})
