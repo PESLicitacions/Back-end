@@ -82,7 +82,6 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
         else:
             return self.serializer_class
 
-
 class LicitacionsPubliquesList(generics.ListAPIView):
     serializer_class = LicitacioPublicaPreviewSerializer
     
@@ -267,6 +266,16 @@ class TipusContracteInfo(generics.ListAPIView):
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
 
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    def get_queryset(self):
+        queryset = None
+        cif = self.kwargs.get('cif')
+        user = Perfil.objects.get(CIF = cif)
+        if user.exists():
+            queryset = LicitacioPublica.objects.all()
+        else:
+            queryset = LicitacioPrivada.objects.all()
+        return queryset
 
 class Add_to_favorites(APIView):
     authentication_classes(IsAuthenticated,)
