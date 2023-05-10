@@ -304,7 +304,7 @@ class Add_to_favorites(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
 
-class Add_to_seguides(APIView):
+class Seguir(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
     
@@ -316,11 +316,11 @@ class Add_to_seguides(APIView):
             if seguir.notificacions == True:
                 seguir.notificacions=False
                 seguir.save()
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from seguint', 'success': True}
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Deixant de seguir licitació', 'success': True}
             else:
                 seguir.notificacions=True
                 seguir.save() 
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to seguint', 'success': True}
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Seguint licitació', 'success': True}
         else:
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'First add it to favorites', 'success': False}
         
