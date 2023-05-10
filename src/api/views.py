@@ -351,11 +351,11 @@ class Seguir(APIView):
             if seguir.notificacions == True:
                 seguir.notificacions=False
                 seguir.save()
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Deixant de seguir licitació', 'success': True}
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Deixant de seguir licitacio', 'success': True}
             else:
                 seguir.notificacions=True
                 seguir.save() 
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Seguint licitació', 'success': True}
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'Seguint licitacio', 'success': True}
         else:
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'First add it to favorites', 'success': False}
         
