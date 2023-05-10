@@ -178,6 +178,7 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
+   
     
 
 class LicitacionsFavoritesList(generics.ListAPIView):
@@ -189,7 +190,16 @@ class LicitacionsFavoritesList(generics.ListAPIView):
         user = self.request.user
         favorits = ListaFavorits.objects.filter(user=user).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=favorits)
+    
+class LicitacionsSeguidesList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        seguint = ListaFavorits.objects.filter(user=user, notificacions = True).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=seguint)
 
 class LicitacionsFollowingList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
@@ -294,23 +304,23 @@ class Add_to_favorites(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
 
-class Add_to_following(APIView):
+class Add_to_seguint(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
     
     def post(self,request, pk):
         user = request.user
         licitacio = get_object_or_404(Licitacio, pk=pk)
-        following = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
-        if following:
-            if following.notificacions == True:
-                following.notificacions=False
-                following.save()
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from following', 'success': True}
+        seguir = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
+        if seguir:
+            if seguir.notificacions == True:
+                seguir.notificacions=False
+                seguir.save()
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from seguint', 'success': True}
             else:
-                following.notificacions=True
-                following.save() 
-                response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to following', 'success': True}
+                seguir.notificacions=True
+                seguir.save() 
+                response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to seguint', 'success': True}
         else:
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'First add it to favorites', 'success': False}
         
