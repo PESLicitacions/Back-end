@@ -5,7 +5,6 @@ from rest_framework.authtoken.views import obtain_auth_token
 from . import views
 from publicdata.views import get_data
 from users.views import edit_perfil
-from licitacions.views import unfollow_licitacio, toggle_notification
 from users.views import edit_perfil, login_view, logout
 
 from rest_framework import routers
@@ -38,8 +37,6 @@ urlpatterns = [
     path('preferences', Add_to_preferences.as_view()),
     path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
-    path('unfollow/<int:pk>', unfollow_licitacio, name='unfollow_licitacio'),
-    path('notifications/<int:pk>', toggle_notification, name='toggle_notification'),
     path('login-user/', login_view, name='login_view'),
     path('logout/', logout_view, name='logout_view')
 ] + router.urls
