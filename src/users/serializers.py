@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from users.models import Perfil
+from users.models import Perfil, CustomUser
 from django.http import JsonResponse
 from rest_framework import status
 
 class PerfilSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Perfil
+        model = CustomUser
         fields = '__all__'
 
 from django.contrib.auth import get_user_model

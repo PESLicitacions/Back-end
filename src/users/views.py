@@ -236,15 +236,18 @@ class ListFollowers(generics.ListAPIView):
 @api_view(['PUT', 'GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
-def edit_perfil(request, cif):
+def edit_perfil(request):
     try:
-        perfil = Perfil.objects.get(CIF = cif)
-    except Perfil.DoesNotExist:
+        perfil = CustomUser.objects.get(username = request.user.username)
+    except CustomUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    serializer = PerfilSerializer(perfil, data=request.data, partial= True)
+    if request.method == 'GET':
+        serializer = PerfilSerializer(perfil)
+        return Response(serializer.data)
     if request.method == 'PUT':
         data_cif = json.dumps(request.data.get('CIF')).strip('"').strip()
         if (len(data_cif) == 9 and not data_cif[0].isnumeric() and not data_cif[8].isnumeric() and data_cif[1:7].isnumeric()):
-            serializer = PerfilSerializer(perfil, data=request.data, partial= True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -253,10 +256,6 @@ def edit_perfil(request, cif):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)
-    
-    if request.method == 'GET':
-        perfil = PerfilSerializer(perfil)
-        return Response(perfil.data)
 
 
 @api_view(['POST'])

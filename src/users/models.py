@@ -32,6 +32,12 @@ class CustomUser(AbstractUser):
     username = models.TextField(max_length=30, unique=True, blank=False)
     name = models.CharField(max_length=30, blank=True)
     phone = models.CharField(max_length=310, blank=True)
+    CIF = models.TextField(primary_key=True, max_length=10)
+    tipus_id = models.TextField(null=False)
+    descripcio = models.TextField(null=True)
+    localitzacio = models.TextField(null=True)
+    cp = models.TextField(null=True)
+    idioma = models.TextField(null=False)
     
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
@@ -40,15 +46,7 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
     
-class Perfil(models.Model):
-    CIF = models.TextField(primary_key=True, max_length=10)
-    tipus_id = models.TextField(null=False)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    descripcio = models.TextField(null=True)
-    localitzacio = models.TextField(null=True)
-    cp = models.TextField(null=True)
-    telefon = models.TextField(null=False)
-    idioma = models.TextField(null=False)
+
 
 
 class Follow(models.Model):

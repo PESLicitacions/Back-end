@@ -35,7 +35,7 @@ urlpatterns = [
     path('users/following', ListFollowing.as_view()),
     path('users/followers', ListFollowers.as_view()),
     path('preferences', Add_to_preferences.as_view()),
-    path('editProfile/<str:cif>/', edit_perfil, name='edit_profile'),
+    path('editProfile', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
     path('login-user/', login_view, name='login_view'),
     path('logout/', logout_view, name='logout_view')
