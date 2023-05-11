@@ -32,12 +32,12 @@ class CustomUser(AbstractUser):
     username = models.TextField(max_length=30, unique=True, blank=False)
     name = models.CharField(max_length=30, blank=True)
     phone = models.CharField(max_length=310, blank=True)
-    CIF = models.TextField(primary_key=True, max_length=10)
-    tipus_id = models.TextField(null=False)
+    CIF = models.TextField( max_length=10, null=True)
+    tipus_id = models.TextField(null=True)
     descripcio = models.TextField(null=True)
     localitzacio = models.TextField(null=True)
     cp = models.TextField(null=True)
-    idioma = models.TextField(null=False)
+    idioma = models.TextField(null=True)
     
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
