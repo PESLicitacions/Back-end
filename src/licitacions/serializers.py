@@ -34,6 +34,7 @@ class LicitacioPreviewSerializer(serializers.ModelSerializer):
 class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
     favorit = serializers.SerializerMethodField()
+    notificacions = serializers.SerializerMethodField()
 
 
     class Meta:
@@ -45,6 +46,16 @@ class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             try:
                 models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
+    
+    def get_notificacions(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj, notificacions = True)
                 return True
             except models.ListaFavorits.DoesNotExist:
                 pass
@@ -88,6 +99,7 @@ class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
 
 class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
     favorit = serializers.SerializerMethodField()
+    notificacions = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPrivada
@@ -103,11 +115,22 @@ class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
                 pass
         return False
     
+    def get_notificacions(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj, notificacions = True)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
+    
 
 
 
 class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
     favorit = serializers.SerializerMethodField()
+    notificacions = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPrivada
@@ -118,6 +141,16 @@ class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             try:
                 models.ListaFavorits.objects.get(user=user, licitacio=obj)
+                return True
+            except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
+    
+    def get_notificacions(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.ListaFavorits.objects.get(user=user, licitacio=obj, notificacions = True)
                 return True
             except models.ListaFavorits.DoesNotExist:
                 pass
