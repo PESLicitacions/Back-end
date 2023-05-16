@@ -11,7 +11,7 @@ from datetime import datetime, date
 
 def get_data(request):
     PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit, codi_departament_ens, nom_departament_ens, codi_organ, nom_organ, tipus_contracte, subtipus_contracte'
-    num_rows = '250'
+    num_rows = '500'
     base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
     response_API = requests.get(base_url)
     data = response_API.text
@@ -108,7 +108,7 @@ def get_data(request):
                 resultsplit = data_formalitzacio_contracte.split('T')
                 data_formalitzacio_contracte = str(resultsplit[0])
 
-            enllaç = licitacio.get('enllac_publicacio')
+            new_enllaç = licitacio.get('enllac_publicacio')
 
             lloc_execucio = get_lloc_execucio(licitacio.get('lloc_execucio'))
 
@@ -120,32 +120,61 @@ def get_data(request):
 
             tipus_contracte = get_tipus_contracte(licitacio.get('tipus_contracte'), licitacio.get('subtipus_contracte'))
 
-            LicitacioPublica.objects.create(procediment = procediment,
-                            fase_publicacio = fase_publicacio,
-                            denominacio = denominacio,
-                            objecte_contracte = objecte_contracte,
-                            pressupost = pressupost_licitacio,
-                            valor_estimat_contracte = valor_estimat_contracte,
-                            duracio_contracte = duracio_contracte,
-                            termini_presentacio_ofertes = termini_presentacio_ofertes,
-                            data_publicacio_anunci = data_publicacio_anunci,
-                            data_publicacio_adjudicacio = data_publicacio_adjudicacio,
-                            codi_cpv = codi_cpv,
-                            import_adjudicacio_sense_iva = import_adjudicacio_sense_iva,
-                            import_adjudicacio_amb_iva = import_adjudicacio_amb_iva,
-                            ofertes_rebudes = ofertes_rebudes,
-                            resultat = resultat,
-                            data_adjudicacio_contracte = data_adjudicacio_contracte,
-                            data_formalitzacio_contracte = data_formalitzacio_contracte,
-                            enllaç = enllaç,
-                            lloc_execucio = lloc_execucio,
-                            ambit = ambit, 
-                            departament = departament, 
-                            organ = organ,
-                            tipus_contracte = tipus_contracte,
-                            data_inici = data_inici,
-                            data_fi = data_fi
-                            )
+            try:
+                db_licitacio = LicitacioPublica.objects.get(enllaç=new_enllaç)
+                db_licitacio.procediment = procediment
+                db_licitacio.fase_publicacio = fase_publicacio
+                db_licitacio.objecte_contracte = objecte_contracte
+                db_licitacio.pressupost = pressupost_licitacio
+                db_licitacio.valor_estimat_contracte = valor_estimat_contracte
+                db_licitacio.duracio_contracte = duracio_contracte
+                db_licitacio.termini_presentacio_ofertes = termini_presentacio_ofertes
+                db_licitacio.data_publicacio_anunci = data_publicacio_anunci
+                db_licitacio.data_publicacio_adjudicacio = data_publicacio_adjudicacio
+                db_licitacio.codi_cpv = codi_cpv
+                db_licitacio.import_adjudicacio_sense_iva = import_adjudicacio_sense_iva
+                db_licitacio.import_adjudicacio_amb_iva = import_adjudicacio_amb_iva
+                db_licitacio.ofertes_rebudes = ofertes_rebudes
+                db_licitacio.resultat = resultat
+                db_licitacio.data_adjudicacio_contracte = data_adjudicacio_contracte
+                db_licitacio.data_formalitzacio_contracte = data_formalitzacio_contracte
+                db_licitacio.enllaç = new_enllaç
+                db_licitacio.lloc_execucio = lloc_execucio
+                db_licitacio.ambit = ambit
+                db_licitacio.departament = departament
+                db_licitacio.organ = organ
+                db_licitacio.tipus_contracte = tipus_contracte
+                db_licitacio.data_inici = data_inici
+                db_licitacio.data_fi = data_fi
+                db_licitacio.save()
+
+            except LicitacioPublica.DoesNotExist:
+                LicitacioPublica.objects.create(procediment = procediment,
+                                fase_publicacio = fase_publicacio,
+                                denominacio = denominacio,
+                                objecte_contracte = objecte_contracte,
+                                pressupost = pressupost_licitacio,
+                                valor_estimat_contracte = valor_estimat_contracte,
+                                duracio_contracte = duracio_contracte,
+                                termini_presentacio_ofertes = termini_presentacio_ofertes,
+                                data_publicacio_anunci = data_publicacio_anunci,
+                                data_publicacio_adjudicacio = data_publicacio_adjudicacio,
+                                codi_cpv = codi_cpv,
+                                import_adjudicacio_sense_iva = import_adjudicacio_sense_iva,
+                                import_adjudicacio_amb_iva = import_adjudicacio_amb_iva,
+                                ofertes_rebudes = ofertes_rebudes,
+                                resultat = resultat,
+                                data_adjudicacio_contracte = data_adjudicacio_contracte,
+                                data_formalitzacio_contracte = data_formalitzacio_contracte,
+                                enllaç = new_enllaç,
+                                lloc_execucio = lloc_execucio,
+                                ambit = ambit, 
+                                departament = departament, 
+                                organ = organ,
+                                tipus_contracte = tipus_contracte,
+                                data_inici = data_inici,
+                                data_fi = data_fi
+                                )
             
            # if(exists):
                 #print('ya existe')

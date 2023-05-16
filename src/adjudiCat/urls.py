@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from publicdata.views import get_data, delete_all_licitacions_publicas, create_db_from_csv
@@ -22,7 +22,8 @@ from publicdata.views import get_data, delete_all_licitacions_publicas, create_d
 urlpatterns = [
     #django URLS
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
+    
+    re_path('api/', include('api.urls')),
     path('get/', get_data, name='getData'),
     path('deleteLicitacionsPrivadas/', delete_all_licitacions_publicas, name='delete'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

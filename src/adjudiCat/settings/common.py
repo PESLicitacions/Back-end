@@ -42,11 +42,13 @@ INSTALLED_APPS = [
     
     #django rest API apps
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     
     #apps
     'licitacions',
     'api',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -81,7 +83,11 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
 
 WSGI_APPLICATION = 'adjudiCat.wsgi.application'
@@ -109,6 +115,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "rest_framework.authentication.TokenAuthentication",
+   #"allauth.account.auth_backends.AuthenticationBackend"
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -139,3 +150,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.CustomUser'
