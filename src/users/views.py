@@ -26,7 +26,7 @@ from users.serializers import UserPreviewSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     User = get_user_model()
-    serializer_class = UserSerializer
+    serializer_class = UserPreviewSerializer
     queryset = User.objects.all()
     
     authentication_classes = (TokenAuthentication,)
@@ -39,7 +39,7 @@ class follow(APIView):
     def post(self,request, pk):
         User = get_user_model()
         follower = request.user
-        following = get_object_or_404(User, pk=pk)
+        following = get_object_or_404(User, id=pk)
         follows = Follow.objects.filter(follower=follower, following=following).first()
         if follows:
             follows.delete()

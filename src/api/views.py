@@ -15,6 +15,7 @@ from licitacions.models import *
 from users.models import *
 from licitacions.serializers import *
 from users.models import CustomUser
+from users.serializers import UserSerializer, UserPreviewSerializer
 
 
 
@@ -321,15 +322,8 @@ class TipusContracteInfo(generics.ListAPIView):
         return queryset
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    def get_queryset(self):
-        queryset = None
-        cif = self.kwargs.get('cif')
-        user = Perfil.objects.get(CIF = cif)
-        if user.exists():
-            queryset = LicitacioPublica.objects.all()
-        else:
-            queryset = LicitacioPrivada.objects.all()
-        return queryset
+    serializer_class = UserPreviewSerializer
+    queryset = CustomUser.objects.all()
 
 class Add_to_favorites(APIView):
     authentication_classes(IsAuthenticated,)

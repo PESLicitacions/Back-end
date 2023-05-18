@@ -3,6 +3,7 @@ from rest_framework import serializers
 from users.models import CustomUser
 from django.http import JsonResponse
 from rest_framework import status
+from .models import Follow
 
 class PerfilSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,7 +29,19 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     
 class UserPreviewSerializer(serializers.ModelSerializer):
+    following = serializers.SerializerMethodField()
+
     class Meta:
         User = get_user_model()
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'name', 'following')
+        
+    def get_following(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                Follow.objects.get(follower=user, following=obj)
+                return True
+            except Follow.DoesNotExist:
+                pass
+        return False
