@@ -39,7 +39,7 @@ class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.LicitacioPublica
-        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit')
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit', 'notificacions')
     
     def get_favorit(self, obj):
         user = self.context['request'].user
@@ -103,7 +103,7 @@ class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.LicitacioPrivada
-        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit')
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'favorit', 'notificacions')
     
     def get_favorit(self, obj):
         user = self.context['request'].user
