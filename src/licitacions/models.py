@@ -130,3 +130,15 @@ class PreferenceTipusLicitacio(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="preference_tipus_licitacio", primary_key=True)
     privades = models.BooleanField(default=False)
     publiques = models.BooleanField(default=False)
+
+
+class Candidatura(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="candidatura", null=True, blank=True)
+    licitacio = models.ForeignKey(LicitacioPrivada, on_delete=models.CASCADE, null=True, blank=True, related_name='candidatura')
+    motiu = models.TextField(null=True)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'licitacio'], name='unique_candidatura'
+            )
+        ]
