@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'licitacions',
     'api',
     'users',
+
+    #automatic tasks
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -152,3 +155,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+CRONJOBS = [
+    ('*/5 * * * *', 'adjudiCat.cron.crontest'),
+]

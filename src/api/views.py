@@ -9,6 +9,9 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
+
 
 
 from licitacions.models import *
@@ -16,6 +19,54 @@ from users.models import *
 from licitacions.serializers import *
 from users.models import CustomUser
 from users.serializers import UserSerializer, UserPreviewSerializer
+
+class CronTests(generics.ListAPIView):
+    def put(self, request):
+        try:
+            l = Localitzacio.objects.get(
+                nom = 'PRUEBA'
+            )
+        except Localitzacio.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        l.latitud = 2.005
+        l.save()
+        return Response(status=status.HTTP_202_ACCEPTED)
+    
+    def delete(self, request):
+        try:
+            Licitacio.objects.all().delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+            l = Localitzacio.objects.get(
+                nom = 'PRUEBA'
+            )
+            tc = TipusContracte.objects.get(
+                tipus_contracte = 'a',
+                subtipus_contracte = 'b'
+            )
+            Licitacio.objects.create(
+                denominacio = 'AAAAAAA',
+                objecte_contracte = 'AAAAAA',
+                pressupost = 155151.02,
+                valor_estimat_contracte = 15.20,
+                duracio_contracte = 1,
+                data_inici = '2023-01-01',
+                data_fi = '2023-12-31',
+                termini_presentacio_ofertes = '2023-12-31',
+                data_publicacio_anunci = '2023-12-31',
+                data_publicacio_adjudicacio = '2023-12-31',
+                import_adjudicacio_sense_iva = 10.05,
+                import_adjudicacio_amb_iva = 11.50,
+                ofertes_rebudes = 5,
+                resultat = 'a',
+                data_adjudicacio_contracte = '2023-12-31',
+                data_formalitzacio_contracte = '2023-12-31',
+                lloc_execucio = l,
+                tipus_contracte = tc
+            )
+            return Response(status=status.HTTP_201_CREATED)
 
 
 

@@ -6,7 +6,6 @@ from . import views
 from publicdata.views import get_data
 from users.views import edit_perfil
 from users.views import edit_perfil, login_view, logout
-
 from rest_framework import routers
 
 router = routers.SimpleRouter()
@@ -38,5 +37,6 @@ urlpatterns = [
     path('editProfile', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
     path('login-user/', login_view, name='login_view'),
-    path('logout/', logout_view, name='logout_view')
+    path('logout/', logout_view, name='logout_view'),
+    path('cron/', CronTests.as_view()),
 ] + router.urls
