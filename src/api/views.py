@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import status
-from requests import Response
+from rest_framework import authentication, permissions, status
+from rest_framework.response import Response
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.pagination import LimitOffsetPagination
@@ -61,7 +61,6 @@ class LicitacionsList(generics.ListAPIView):
         return queryset
 
 
-
 class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         queryset = None
@@ -83,6 +82,21 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
             return LicitacioPrivadaDetailsSerializer
         else:
             return self.serializer_class
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if the instance is LicitacioPrivada
+        if isinstance(instance, LicitacioPrivada):
+            # Check if the user is authenticated and the owner of the LicitacioPrivada
+            if request.user.is_authenticated and request.user == instance.user:
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 class LicitacionsPubliquesList(generics.ListAPIView):
     serializer_class = LicitacioPublicaPreviewSerializer
@@ -142,7 +156,24 @@ class LicitacionsPubliquesList(generics.ListAPIView):
 
 
 class LicitacionsPrivadesList(generics.ListCreateAPIView):
-    serializer_class = LicitacioPrivadaPreviewSerializer
+    authentication_classes = [authentication.TokenAuthentication]  # Specify TokenAuthentication for authentication
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            # Require authentication for the POST method
+            return [permissions.IsAuthenticated()]
+        else:
+            # Allow unauthenticated access for the GET method
+            return []
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return LicitacioPrivadaPreviewSerializer
+        elif self.request.method == 'POST':
+            return LicitacioPrivadaDetailsSerializer
+        else:
+            # Return the default serializer class
+            return self.serializer_class
 
     def get_queryset(self):
         queryset = LicitacioPrivada.objects.all()
@@ -180,9 +211,11 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
-   
     
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
+   
 class LicitacionsFavoritesList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -203,6 +236,7 @@ class LicitacionsSeguidesList(generics.ListAPIView):
         user = self.request.user
         seguint = ListaFavorits.objects.filter(user=user, notificacions = True).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=seguint)
+
 
 class LicitacionsFollowingList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
@@ -321,9 +355,11 @@ class TipusContracteInfo(generics.ListAPIView):
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
 
+
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserPreviewSerializer
     queryset = CustomUser.objects.all()
+
 
 class Add_to_favorites(APIView):
     authentication_classes(IsAuthenticated,)
@@ -341,6 +377,7 @@ class Add_to_favorites(APIView):
             favorit.save()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
+
 
 class Seguir(APIView):
     authentication_classes(IsAuthenticated,)
@@ -363,6 +400,7 @@ class Seguir(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'First add it to favorites', 'success': False}
         
         return JsonResponse(response_data)
+
 
 class Add_to_preferences(APIView):
     authentication_classes(IsAuthenticated,)
