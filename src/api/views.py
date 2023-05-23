@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import authentication, permissions
-from requests import Response
+from rest_framework import authentication, permissions, status
+from rest_framework.response import Response
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.pagination import LimitOffsetPagination
@@ -82,6 +82,20 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
             return LicitacioPrivadaDetailsSerializer
         else:
             return self.serializer_class
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if the instance is LicitacioPrivada
+        if isinstance(instance, LicitacioPrivada):
+            # Check if the user is authenticated and the owner of the LicitacioPrivada
+            if request.user.is_authenticated and request.user == instance.user:
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class LicitacionsPubliquesList(generics.ListAPIView):
@@ -199,7 +213,7 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
         return queryset
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)  # Set the authenticated user as the user for the new object
+        serializer.save(user=self.request.user)
 
    
 class LicitacionsFavoritesList(generics.ListAPIView):
