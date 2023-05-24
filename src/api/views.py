@@ -402,6 +402,28 @@ class Seguir(APIView):
         return JsonResponse(response_data)
 
 
+class Aply(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def post(self,request, pk):
+        user = request.user
+        motiu = request.data.get('motiu')
+        print(motiu)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=pk)
+        aplied = Candidatura.objects.filter(user=user, licitacio=licitacio).first()
+        if aplied:
+            aplied.delete()
+            licitacio.ofertes_rebudes = licitacio.ofertes_rebudes - 1
+            licitacio.save()
+        else:
+            aplied = Candidatura(user=user, licitacio=licitacio, motiu=motiu)
+            aplied.save() 
+            licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
+            licitacio.save()
+        return Response(status=status.HTTP_200_OK)
+
+
 class Add_to_preferences(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
