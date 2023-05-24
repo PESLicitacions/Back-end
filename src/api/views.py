@@ -238,6 +238,17 @@ class LicitacionsSeguidesList(generics.ListAPIView):
         return Licitacio.objects.filter(id__in=seguint)
 
 
+class LicitacionsApliedList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        seguint = Candidatura.objects.filter(user=user).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=seguint)
+
+
 class LicitacionsFollowingList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -400,6 +411,28 @@ class Seguir(APIView):
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'First add it to favorites', 'success': False}
         
         return JsonResponse(response_data)
+
+
+class Aply(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def post(self,request, pk):
+        user = request.user
+        motiu = request.data.get('motiu')
+        print(motiu)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=pk)
+        aplied = Candidatura.objects.filter(user=user, licitacio=licitacio).first()
+        if aplied:
+            aplied.delete()
+            licitacio.ofertes_rebudes = licitacio.ofertes_rebudes - 1
+            licitacio.save()
+        else:
+            aplied = Candidatura(user=user, licitacio=licitacio, motiu=motiu)
+            aplied.save() 
+            licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
+            licitacio.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class Add_to_preferences(APIView):
