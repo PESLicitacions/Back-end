@@ -238,6 +238,17 @@ class LicitacionsSeguidesList(generics.ListAPIView):
         return Licitacio.objects.filter(id__in=seguint)
 
 
+class LicitacionsApliedList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        seguint = Candidatura.objects.filter(user=user).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=seguint)
+
+
 class LicitacionsFollowingList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
