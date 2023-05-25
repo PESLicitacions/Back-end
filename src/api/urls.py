@@ -6,7 +6,6 @@ from . import views
 from publicdata.views import get_data
 from users.views import edit_perfil
 from users.views import edit_perfil, login_view, logout
-
 from rest_framework import routers
 
 router = routers.SimpleRouter()
@@ -19,9 +18,11 @@ urlpatterns = [
     path('licitacions/favorites', LicitacionsFavoritesList.as_view()),
     path('licitacions/following', LicitacionsSeguidesList.as_view()),
     path('licitacions/preferences', LicitacionsPreferencesList.as_view()),
+    path('licitacions/aplied', LicitacionsApliedList.as_view()),
     path('licitacions/<int:pk>/', LicitacioDetailView.as_view()),
     path('licitacions/<int:pk>/save', Add_to_favorites.as_view()),
     path('licitacions/<int:pk>/follow', Seguir.as_view()),
+    path('licitacions/<int:pk>/aply', Aply.as_view()),
     path('localitzacions', LocalitzacionsInfo.as_view()),
     path('ambits', AmbitsInfo.as_view()),
     path('departaments', DepartamentsInfo.as_view()),
@@ -38,5 +39,6 @@ urlpatterns = [
     path('editProfile', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
     path('login-user/', login_view, name='login_view'),
-    path('logout/', logout_view, name='logout_view')
+    path('logout/', logout_view, name='logout_view'),
+    path('cron/', CronTests.as_view()),
 ] + router.urls
