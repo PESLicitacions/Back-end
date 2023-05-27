@@ -247,6 +247,9 @@ class Add_to_preferences(APIView):
                              "tipus_licitacio": tipus_lic_data})
         
 class RatingCreateView(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
     def post(self, request):
         evaluating_user = request.POST.get('evaluating_user')
         evaluated_user = request.POST.get('evaluated_user')
