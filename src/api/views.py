@@ -464,6 +464,20 @@ class Seguir(APIView):
         return JsonResponse(response_data)
 
 
+
+class VisualitzarCandidatura(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def get(self,request, pk):
+        try:
+            candidatura = Candidatura.objects.get(id = pk)
+            serializercand = CandidaturaSerializer(candidatura)
+        except Candidatura.DoesNotExist:
+            return Response({'error': 'La candidatura no existe'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializercand.data, status=status.HTTP_200_OK)
+
+
 class Aply(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
