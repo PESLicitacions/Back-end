@@ -255,7 +255,16 @@ class RatingCreateView(APIView):
         user_from = get_object_or_404(CustomUser, email=evaluating_user)
         user_to = get_object_or_404(CustomUser, email=evaluated_user)
 
+        # Verificar si existe una valoración previa y eliminarla si es el caso
+        try:
+            previous_rating = Rating.objects.get(
+                evaluating_user=user_from, evaluated_user=user_to
+            )
+            previous_rating.delete()
+        except Rating.DoesNotExist:
+            pass
+
         rating = Rating(evaluating_user=user_from, evaluated_user=user_to, value=value)
         rating.save()
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': evaluating_user + 'ha valorado con un ' + value + ' a ' + evaluated_user})
