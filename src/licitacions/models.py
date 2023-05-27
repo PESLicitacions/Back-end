@@ -67,6 +67,8 @@ class Licitacio(models.Model):
     data_formalitzacio_contracte = models.DateField(null=True)
     lloc_execucio = models.ForeignKey(Localitzacio, to_field='nom', related_name="licitacio", null=True, on_delete=models.SET_NULL)
     tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="licitacio", null=True, on_delete=models.SET_NULL)
+    visualitzacions = models.IntegerField(null=True)
+    num_favorits = models.IntegerField(null=True)
 
     def tipus_contracte_name(self):
         return TipusContracte.objects.filter(id=self.tipus_contracte).__str__
