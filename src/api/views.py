@@ -429,11 +429,6 @@ class TipusContracteInfo(generics.ListAPIView):
         return queryset
 
 
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = UserPreviewSerializer
-    queryset = CustomUser.objects.all()
-
-
 class Add_to_favorites(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -516,90 +511,7 @@ class Aply(APIView):
             licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
             licitacio.save()
         return Response(status=status.HTTP_200_OK)
-
-
-class Add_to_preferences(APIView):
-    authentication_classes(IsAuthenticated,)
-    permission_classes(TokenAuthentication,)
-
-    def post(self, request):
-        user = request.user
-
-        tipus_contracte_ids = request.query_params.get('tipus_contracte')
-        PreferenceTipusContracte.objects.filter(user=user).delete()
-        if tipus_contracte_ids is not None and tipus_contracte_ids != "":
-            tipus_contracte_ids = [int(id) for id in tipus_contracte_ids.split(',')]
-            for tipus_contracte_id in tipus_contracte_ids:
-                tipus_contracte = get_object_or_404(TipusContracte, id=tipus_contracte_id)
-                preference_tp = PreferenceTipusContracte(user=user, tipus_contracte=tipus_contracte)
-                try:
-                    preference_tp.save()
-                except:
-                    pass
-
-        ambit_ids = request.query_params.get('ambit')
-        PreferenceAmbit.objects.filter(user=user).delete()
-        if ambit_ids is not None and ambit_ids != "":
-            ambit_ids = [int(id) for id in ambit_ids.split(',')]
-            for ambit_id in ambit_ids:
-                ambit = get_object_or_404(Ambit, codi=ambit_id)
-                preference_amb = PreferenceAmbit(user=user, ambit=ambit)
-                try:
-                    preference_amb.save()
-                except:
-                    pass
-        
-        pressupost_min = request.query_params.get('pressupost_min')
-        pressupost_max = request.query_params.get('pressupost_max')
-        PreferencePressupost.objects.filter(user=user).delete()
-        if pressupost_min is not None or pressupost_max is not None:
-            preference_press = PreferencePressupost(user=user, pressupost_min=pressupost_min, pressupost_max=pressupost_max)
-            try:
-                preference_press.save()
-            except:
-                pass
-        
-        privades = request.query_params.get('privades')
-        print(privades)
-        publiques = request.query_params.get('publiques')
-        print(publiques)
-        PreferenceTipusLicitacio.objects.filter(user=user).delete()
-        if privades is not None or publiques is not None:
-            if privades is None:
-                privades = False
-            if publiques is None:
-                publiques = False
-            preference_tipus_lic = PreferenceTipusLicitacio(user=user, privades=privades, publiques=publiques)
-            try:
-                preference_tipus_lic.save()
-            except:
-                pass
-
-        return JsonResponse({'status': 'ok'})
-    
-    def get(self, request):
-        user = request.user
-
-        tipus_contracte_preferences = PreferenceTipusContracte.objects.filter(user=user)
-        tipus_contracte_data = [{"id": p.tipus_contracte.id, "name": str(p.tipus_contracte)} for p in tipus_contracte_preferences]
-
-        ambit_preferences = PreferenceAmbit.objects.filter(user=user)
-        ambit_data = [{"id": p.ambit.codi, "name": p.ambit.nom} for p in ambit_preferences]
-
-        pressupost_preference = PreferencePressupost.objects.filter(user=user).first()
-        pressupost_data = {"pressupost_min": pressupost_preference.pressupost_min if pressupost_preference else None,
-                           "pressupost_max": pressupost_preference.pressupost_max if pressupost_preference else None}
-
-        tipus_lic_preference = PreferenceTipusLicitacio.objects.filter(user=user).first()
-        tipus_lic_data = {"privades": tipus_lic_preference.privades if tipus_lic_preference else False,
-                          "publiques": tipus_lic_preference.publiques if tipus_lic_preference else False}
-
-        return JsonResponse({"tipus_contracte": tipus_contracte_data,
-                             "ambit": ambit_data,
-                             "pressupost": pressupost_data,
-                             "tipus_licitacio": tipus_lic_data})
-    
-
+      
 class Estadistiques(APIView):
     def get(self, request, pk):
         print("HE ENTRADO")
