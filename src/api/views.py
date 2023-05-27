@@ -114,6 +114,7 @@ class LicitacionsList(generics.ListAPIView):
 
 class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
+        print("QUERYSET")
         queryset = None
         pk = self.kwargs.get('pk')
         licitacio_publica = LicitacioPublica.objects.filter(pk=pk)
@@ -125,6 +126,16 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_serializer_class(self):
         obj = self.get_object()
+        pk = self.kwargs.get('pk')
+        try:
+            licitacio = Licitacio.objects.get(id = pk)
+            if(licitacio.visualitzacions is None):
+                licitacio.visualitzacions = 1
+            else:
+                licitacio.visualitzacions = licitacio.visualitzacions + 1
+            licitacio.save()
+        except Licitacio.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if isinstance(obj, LicitacioPublica):
             print("entered lic pub serializer")
             return LicitacioPublicaDetailsSerializer
@@ -432,9 +443,16 @@ class Add_to_favorites(APIView):
         licitacio = get_object_or_404(Licitacio, pk=pk)
         favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
         if favorit:
+            licitacio.num_favorits = licitacio.num_favorits - 1
+            licitacio.save()
             favorit.delete()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from favorites', 'success': True}
         else:
+            if(licitacio.num_favorits == None):
+                licitacio.num_favorits = 1
+            else:
+                licitacio.num_favorits = licitacio.num_favorits + 1
+            licitacio.save()
             favorit = ListaFavorits(user=user, licitacio=licitacio)
             favorit.save()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
@@ -580,3 +598,15 @@ class Add_to_preferences(APIView):
                              "ambit": ambit_data,
                              "pressupost": pressupost_data,
                              "tipus_licitacio": tipus_lic_data})
+    
+
+class Estadistiques(APIView):
+    def get(self, request, pk):
+        print("HE ENTRADO")
+        try:
+            licitacio = Licitacio.objects.get(id = pk)
+        except Licitacio.DoesNotExist:
+            print("No existe")
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = EstadistiquesSerializer(licitacio)
+        return Response(serializer.data, status.HTTP_404_NOT_FOUND)
