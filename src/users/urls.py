@@ -33,7 +33,10 @@ urlpatterns = [
     path('following', ListFollowing.as_view()),
     # Get userse that follow you
     path('followers', ListFollowers.as_view()),
+
+    #Create a rating
     path('ratings/', RatingCreateView.as_view(), name='rating_create'),
+    #Get the average rating of a user
     path('ratings/average/', RatingAverageView.as_view()),
 
 

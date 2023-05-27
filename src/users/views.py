@@ -41,7 +41,9 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserCreateSerializer
         if self.action == 'list':
             return UserPreviewSerializer
-        if self.action == ('put' or 'delete') :
+        if self.action == 'put':
+            return UserProfileEditSerializer
+        if self.action == 'delete':
             return UserProfileSerializer
         return UserSerializer
     
@@ -49,7 +51,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(methods=['put'], detail=False)
     def put(self, request, format=None):
         user = request.user
-        serializer = UserProfileSerializer(user, data=request.data, partial=True)
+        serializer = UserProfileEditSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

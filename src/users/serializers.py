@@ -84,3 +84,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
             except Follow.DoesNotExist:
                 pass
         return False
+    
+# Serializer to edit the User Profile  
+class UserProfileEditSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        User = get_user_model()
+        model = User
+        fields = ('id', 'username', 'email', 'name', 'descripcio', 'phone', 'localitzacio')
+        
+    def get_following(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                Follow.objects.get(follower=user)
+                return True
+            except Follow.DoesNotExist:
+                pass
+        return False
