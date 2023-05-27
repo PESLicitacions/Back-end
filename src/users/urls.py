@@ -33,6 +33,8 @@ urlpatterns = [
     path('following', ListFollowing.as_view()),
     # Get userse that follow you
     path('followers', ListFollowers.as_view()),
+    path('ratings/', RatingCreateView.as_view(), name='rating_create'),
+
     
     
     

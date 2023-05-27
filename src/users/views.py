@@ -245,3 +245,17 @@ class Add_to_preferences(APIView):
                              "ambit": ambit_data,
                              "pressupost": pressupost_data,
                              "tipus_licitacio": tipus_lic_data})
+        
+class RatingCreateView(APIView):
+    def post(self, request):
+        evaluating_user = request.POST.get('evaluating_user')
+        evaluated_user = request.POST.get('evaluated_user')
+        value = request.POST.get('value')
+
+        user_from = get_object_or_404(CustomUser, email=evaluating_user)
+        user_to = get_object_or_404(CustomUser, email=evaluated_user)
+
+        rating = Rating(evaluating_user=user_from, evaluated_user=user_to, value=value)
+        rating.save()
+
+        return JsonResponse({'success': True})

@@ -57,3 +57,8 @@ class Follow(models.Model):
                 fields=['follower', 'following'], name='unique_follow'
             )
         ]
+
+class Rating(models.Model):
+    evaluating_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='evaluating_user')
+    evaluated_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='evaluated_user')
+    value = models.IntegerField(null=True)
