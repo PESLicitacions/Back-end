@@ -1,16 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 from api.views import *
-from users.views import *
-from rest_framework.authtoken.views import obtain_auth_token
 from . import views
 from publicdata.views import get_data
-from users.views import edit_perfil
-from users.views import edit_perfil, login_view, logout
-
-from rest_framework import routers
-
-router = routers.SimpleRouter()
-router.register(r'users', UserViewSet)
 
 urlpatterns = [
     path('licitacions', LicitacionsList.as_view()),
@@ -29,16 +20,9 @@ urlpatterns = [
     path('departaments', DepartamentsInfo.as_view()),
     path('organs', OrgansInfo.as_view()),
     path('tipus_contracte', TipusContracteInfo.as_view()),
-    path('login/', obtain_auth_token),
-    path('delete/', delete_user),
-    path('users/<int:pk>', UserDetailView.as_view()),
-    path('users/<int:pk>/follow', follow.as_view()),
-    path('users/following', ListFollowing.as_view()),
+    
+
     path('users/following/licitacions', LicitacionsFollowingList.as_view()),
-    path('users/followers', ListFollowers.as_view()),
-    path('preferences', Add_to_preferences.as_view()),
-    path('editProfile', edit_perfil, name='edit_profile'),
     path('updateBD/', get_data, name='update_BD'),
-    path('login-user/', login_view, name='login_view'),
-    path('logout/', logout_view, name='logout_view')
-] + router.urls
+    path("users/", include("users.urls")),   
+]
