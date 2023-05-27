@@ -196,3 +196,18 @@ class ListaFavoritsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListaFavorits
         fields = '__all__'
+
+
+class CandidaturaSerializer(serializers.ModelSerializer):
+    favorit = serializers.SerializerMethodField()
+    notificacions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Candidatura
+        fields = '__all__'
+
+class EstadistiquesSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = models.Licitacio
+        fields = ('id', 'ofertes_rebudes', 'visualitzacions', 'num_favorits')

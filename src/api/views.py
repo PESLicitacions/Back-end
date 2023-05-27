@@ -9,6 +9,9 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
+
 
 
 from licitacions.models import *
@@ -16,6 +19,54 @@ from users.models import *
 from licitacions.serializers import *
 from users.models import CustomUser
 from users.serializers import UserSerializer, UserPreviewSerializer
+
+class CronTests(generics.ListAPIView):
+    def put(self, request):
+        try:
+            l = Localitzacio.objects.get(
+                nom = 'PRUEBA'
+            )
+        except Localitzacio.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        l.latitud = 2.005
+        l.save()
+        return Response(status=status.HTTP_202_ACCEPTED)
+    
+    def delete(self, request):
+        try:
+            Licitacio.objects.all().delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+            l = Localitzacio.objects.get(
+                nom = 'PRUEBA'
+            )
+            tc = TipusContracte.objects.get(
+                tipus_contracte = 'a',
+                subtipus_contracte = 'b'
+            )
+            Licitacio.objects.create(
+                denominacio = 'AAAAAAA',
+                objecte_contracte = 'AAAAAA',
+                pressupost = 155151.02,
+                valor_estimat_contracte = 15.20,
+                duracio_contracte = 1,
+                data_inici = '2023-01-01',
+                data_fi = '2023-12-31',
+                termini_presentacio_ofertes = '2023-12-31',
+                data_publicacio_anunci = '2023-12-31',
+                data_publicacio_adjudicacio = '2023-12-31',
+                import_adjudicacio_sense_iva = 10.05,
+                import_adjudicacio_amb_iva = 11.50,
+                ofertes_rebudes = 5,
+                resultat = 'a',
+                data_adjudicacio_contracte = '2023-12-31',
+                data_formalitzacio_contracte = '2023-12-31',
+                lloc_execucio = l,
+                tipus_contracte = tc
+            )
+            return Response(status=status.HTTP_201_CREATED)
 
 
 
@@ -63,6 +114,7 @@ class LicitacionsList(generics.ListAPIView):
 
 class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
+        print("QUERYSET")
         queryset = None
         pk = self.kwargs.get('pk')
         licitacio_publica = LicitacioPublica.objects.filter(pk=pk)
@@ -74,6 +126,16 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_serializer_class(self):
         obj = self.get_object()
+        pk = self.kwargs.get('pk')
+        try:
+            licitacio = Licitacio.objects.get(id = pk)
+            if(licitacio.visualitzacions is None):
+                licitacio.visualitzacions = 1
+            else:
+                licitacio.visualitzacions = licitacio.visualitzacions + 1
+            licitacio.save()
+        except Licitacio.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if isinstance(obj, LicitacioPublica):
             print("entered lic pub serializer")
             return LicitacioPublicaDetailsSerializer
@@ -376,9 +438,16 @@ class Add_to_favorites(APIView):
         licitacio = get_object_or_404(Licitacio, pk=pk)
         favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
         if favorit:
+            licitacio.num_favorits = licitacio.num_favorits - 1
+            licitacio.save()
             favorit.delete()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from favorites', 'success': True}
         else:
+            if(licitacio.num_favorits == None):
+                licitacio.num_favorits = 1
+            else:
+                licitacio.num_favorits = licitacio.num_favorits + 1
+            licitacio.save()
             favorit = ListaFavorits(user=user, licitacio=licitacio)
             favorit.save()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
@@ -408,6 +477,20 @@ class Seguir(APIView):
         return JsonResponse(response_data)
 
 
+
+class VisualitzarCandidatura(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def get(self,request, pk):
+        try:
+            candidatura = Candidatura.objects.get(id = pk)
+            serializercand = CandidaturaSerializer(candidatura)
+        except Candidatura.DoesNotExist:
+            return Response({'error': 'La candidatura no existe'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializercand.data, status=status.HTTP_200_OK)
+
+
 class Aply(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -428,3 +511,14 @@ class Aply(APIView):
             licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
             licitacio.save()
         return Response(status=status.HTTP_200_OK)
+      
+class Estadistiques(APIView):
+    def get(self, request, pk):
+        print("HE ENTRADO")
+        try:
+            licitacio = Licitacio.objects.get(id = pk)
+        except Licitacio.DoesNotExist:
+            print("No existe")
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = EstadistiquesSerializer(licitacio)
+        return Response(serializer.data, status.HTTP_404_NOT_FOUND)
