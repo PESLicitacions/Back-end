@@ -41,4 +41,5 @@ urlpatterns = [
     path('login-user/', login_view, name='login_view'),
     path('logout/', logout_view, name='logout_view'),
     path('cron/', CronTests.as_view()),
+    path('candidatura/<int:pk>', VisualitzarCandidatura.as_view()),
 ] + router.urls
