@@ -24,7 +24,7 @@ from users.serializers import *
 from users.permissions import IsCreationOrIsAuthenticated
 from users.models import *
 
-from users.serializers import *
+from django.db.models import Avg
 
 # Create your views here.
 
@@ -271,3 +271,19 @@ class RatingCreateView(APIView):
         rating.save()
 
         return JsonResponse({'success': evaluating_user + 'ha valorado con un ' + value + ' a ' + evaluated_user})
+
+
+class RatingAverageView(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def get(self, request):
+        user_email = request.POST.get('evaluated_user')
+
+        user = get_object_or_404(CustomUser, email=user_email)
+
+        average = Rating.objects.filter(evaluated_user=user).aggregate(Avg('value'))['value__avg']
+        if average is not None:
+            average = round(average, 2)
+
+        return JsonResponse({'average_rating': average})
