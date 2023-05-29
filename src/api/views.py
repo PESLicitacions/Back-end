@@ -513,6 +513,9 @@ class Aply(APIView):
         return Response(status=status.HTTP_200_OK)
       
 class Estadistiques(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
     def get(self, request, pk):
         print("HE ENTRADO")
         try:
@@ -522,3 +525,15 @@ class Estadistiques(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EstadistiquesSerializer(licitacio)
         return Response(serializer.data, status.HTTP_404_NOT_FOUND)
+
+class LicitacionsPrivadesUser(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def get(self,request):
+        try:
+            licitacions = LicitacioPrivada.objects.get(user = request.user)
+        except LicitacioPrivada.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = LicitacioPrivadaPreviewSerializer(licitacions, many = True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
