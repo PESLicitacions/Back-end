@@ -101,6 +101,19 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
             return LicitacioPrivadaDetailsSerializer
         else:
             return self.serializer_class
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if the instance is LicitacioPrivada
+        if isinstance(instance, LicitacioPrivada):
+            # Check if the user is authenticated and the owner of the LicitacioPrivada
+            if request.user.is_authenticated and request.user == instance.user:
+                return super().update(request, *args, **kwargs)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
