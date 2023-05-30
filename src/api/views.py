@@ -501,12 +501,14 @@ class LicitacionsPrivadesUser(APIView):
     permission_classes(TokenAuthentication,)
 
     def get(self,request):
+        user = request.user
         try:
-            licitacions = LicitacioPrivada.objects.get(user = request.user)
+            licitacions = LicitacioPrivada.objects.filter(user = user)
         except LicitacioPrivada.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = LicitacioPrivadaPreviewSerializer(licitacions, many = True)
+        serializer = LicitacioPrivadaPreviewSerializer(licitacions, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
     
 
 class Add_to_preferences(APIView):
