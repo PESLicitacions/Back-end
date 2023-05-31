@@ -71,6 +71,7 @@ class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
             except models.ListaFavorits.DoesNotExist:
                 pass
         return False
+    
 
 
 
@@ -81,7 +82,6 @@ class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
     organ = serializers.StringRelatedField(many=False)
     favorit = serializers.SerializerMethodField()
     notificacions = serializers.SerializerMethodField()
-    candidatura = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPublica
@@ -106,22 +106,14 @@ class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
             except models.ListaFavorits.DoesNotExist:
                 pass
         return False
-    
-    def get_candidatura(self, obj):
-        user = self.context['request'].user
-        if user.is_authenticated:
-            try:
-                models.Candidatura.objects.get(user=user, licitacio=obj)
-                return True
-            except models.Candidatura.DoesNotExist:
-                pass
-        return False
+
     
 
 
 class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
     favorit = serializers.SerializerMethodField()
     notificacions = serializers.SerializerMethodField()
+    candidatura = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPrivada
@@ -144,6 +136,15 @@ class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
                 models.ListaFavorits.objects.get(user=user, licitacio=obj, notificacions = True)
                 return True
             except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
+    def get_candidatura(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.Candidatura.objects.get(user=user, licitacio=obj)
+                return True
+            except models.Candidatura.DoesNotExist:
                 pass
         return False
     
