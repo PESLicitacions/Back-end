@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from licitacions import models
+from users.serializers import UserProfileSerializer
 from .models import ListaFavorits
 
 class LicitacioPreviewSerializer(serializers.ModelSerializer):
@@ -232,6 +233,8 @@ class ListaFavoritsSerializer(serializers.ModelSerializer):
 
 
 class CandidaturaSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()
+
     class Meta:
         model = models.Candidatura
         fields = '__all__'
