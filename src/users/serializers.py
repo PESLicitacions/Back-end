@@ -3,7 +3,7 @@ from rest_framework import serializers
 from users.models import CustomUser
 from django.http import JsonResponse
 from rest_framework import status
-from .models import Follow
+from .models import Follow, Notification
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -102,3 +102,8 @@ class UserProfileEditSerializer(serializers.ModelSerializer):
             except Follow.DoesNotExist:
                 pass
         return False
+    
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'

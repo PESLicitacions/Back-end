@@ -7,6 +7,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 from licitacions.models import Localitzacio
+from users import choices
+from licitacions.models import Licitacio
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password, **extra_fields):
@@ -62,3 +65,11 @@ class Rating(models.Model):
     evaluating_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='evaluating_user')
     evaluated_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='evaluated_user')
     value = models.IntegerField(null=True)
+
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    mesage = models.CharField(max_length=150, choices=choices.notifications, null=True)
+    licitacio = models.ForeignKey(Licitacio, on_delete=models.CASCADE, null=True, blank=True, related_name='licitacio_afectada')
+    nom_licitacio = models.CharField(max_length=150, null=True)

@@ -289,3 +289,12 @@ class RatingAverageView(APIView):
             average = round(average, 2)
 
         return JsonResponse({'average_rating': average})
+
+class NotificationsList(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def get(self, request):
+        notifications = Notification.objects.filter(user = request.user)
+        NotificationSerializer(notifications, many = True)
+        return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)

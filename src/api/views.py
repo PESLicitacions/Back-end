@@ -16,6 +16,7 @@ from rest_framework.response import Response
 
 from licitacions.models import *
 from users.models import *
+from users.serializers import NotificationSerializer
 from licitacions.serializers import *
 from users.models import CustomUser
 from users.serializers import UserSerializer, UserPreviewSerializer
@@ -245,7 +246,20 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
         return queryset
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        licitacio = serializer.save(user=self.request.user)
+        try:
+            followers = Follow.objects.filter(following = self.request.user)
+        except:
+            print('No tiene followers')
+        for f in followers:
+            Notification.objects.create(
+                            user = f.follower,
+                            licitacio = licitacio,
+                            mesage = 'Nueva publicación',
+                            nom_licitacio = licitacio.denominacio
+            )
+        return Response(status.HTTP_201_CREATED)
+            
 
    
 class LicitacionsFavoritesList(generics.ListAPIView):
@@ -477,9 +491,19 @@ class Aply(APIView):
             licitacio.save()
         else:
             aplied = Candidatura(user=user, licitacio=licitacio, motiu=motiu)
-            aplied.save() 
-            licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
+            aplied.save()
+            if(licitacio.ofertes_rebudes == None):
+                licitacio.ofertes_rebudes = 1     
+            else:
+                licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
             licitacio.save()
+            notification = Notification.objects.create(
+                        user = licitacio.user,
+                        licitacio = licitacio,
+                        mesage = 'Usuario presentado',
+                        nom_licitacio = licitacio.denominacio
+                    )
+            return Response(NotificationSerializer(notification).data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_200_OK)
       
 class Estadistiques(APIView):

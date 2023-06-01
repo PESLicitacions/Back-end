@@ -38,9 +38,7 @@ urlpatterns = [
     path('ratings/', RatingCreateView.as_view(), name='rating_create'),
     #Get the average rating of a user
     path('ratings/average/', RatingAverageView.as_view()),
-
-
-    
+    path('notifications/', NotificationsList.as_view()),    
     
     
 
