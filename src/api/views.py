@@ -24,7 +24,7 @@ from publicdata.views import get_data
 
 class CronTests(generics.ListAPIView):
 
-    def post(self, request):
+    def get(self, request):
            get_data()
            return Response(status=status.HTTP_200_OK)
 
