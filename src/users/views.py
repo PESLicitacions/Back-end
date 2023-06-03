@@ -18,7 +18,7 @@ from rest_framework import viewsets
 from rest_framework import views
 from rest_framework import mixins
 from rest_framework import generics
-
+from users.models import Follow
 from licitacions.models import *
 from users.serializers import *
 from users.permissions import IsCreationOrIsAuthenticated
@@ -74,6 +74,7 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserProfileSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
 
 # Follow Users Views
 class FollowView(APIView):
@@ -238,3 +239,12 @@ class RatingAverageView(APIView):
             average = round(average, 2)
 
         return JsonResponse({'average_rating': average})
+
+class NotificationsList(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def get(self, request):
+        notifications = Notification.objects.filter(user = self.request.user)
+        NotificationSerializer(notifications, many = True)
+        return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)

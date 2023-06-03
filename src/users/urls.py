@@ -23,6 +23,7 @@ urlpatterns = [
     # Post Follow a user if not following else unfollow
     path('<int:pk>/follow', FollowView.as_view()),
     # Get users following you
+
     path('following', ListFollowing.as_view()),
     # Get userse that follow you
     path('followers', ListFollowers.as_view()),
@@ -31,6 +32,9 @@ urlpatterns = [
     path('ratings/', RatingCreateView.as_view(), name='rating_create'),
     #Get the average rating of a user
     path('ratings/average/', RatingAverageView.as_view()),
+
+    path('notifications/', NotificationsList.as_view()),    
+
     
 
 ]
