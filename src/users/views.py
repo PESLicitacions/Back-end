@@ -18,7 +18,7 @@ from rest_framework import viewsets
 from rest_framework import views
 from rest_framework import mixins
 from rest_framework import generics
-
+from users.models import Follow
 from licitacions.models import *
 from users.serializers import *
 from users.permissions import IsCreationOrIsAuthenticated
@@ -80,7 +80,7 @@ class UserDetail(APIView):
     
 
 
-class Follow(APIView):
+class FollowFunctionilities(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
     

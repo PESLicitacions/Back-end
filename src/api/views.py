@@ -484,6 +484,7 @@ class Aply(APIView):
         motiu = request.data.get('motiu')
         print(motiu)
         licitacio = get_object_or_404(LicitacioPrivada, pk=pk)
+        print('peta')
         aplied = Candidatura.objects.filter(user=user, licitacio=licitacio).first()
         if aplied:
             aplied.delete()

@@ -28,7 +28,7 @@ urlpatterns = [
     path('<int:pk>', UserDetailView.as_view()),
     
     # Post Follow a user if not following else unfollow
-    path('<int:pk>/follow', Follow.as_view()),
+    path('<int:pk>/follow', FollowFunctionilities.as_view()),
     # Get users Following
     path('following', ListFollowing.as_view()),
     # Get userse that follow you
