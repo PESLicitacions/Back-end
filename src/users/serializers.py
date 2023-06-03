@@ -73,7 +73,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         User = get_user_model()
         model = User
-        fields = ('id', 'username', 'email', 'name', 'descripcio', 'phone', 'localitzacio',  'following')
+        fields = ('id', 'username', 'email', 'name', 'descripcio', 'phone', 'localitzacio',  'CIF', 'tipus_id', 'cp', 'idioma', 'following')
         
     def get_following(self, obj):
         user = self.context['request'].user
@@ -91,7 +91,7 @@ class UserProfileEditSerializer(serializers.ModelSerializer):
     class Meta:
         User = get_user_model()
         model = User
-        fields = ('id', 'username', 'email', 'name', 'descripcio', 'phone', 'localitzacio')
+        fields = ('id', 'username', 'email', 'name', 'descripcio', 'phone', 'localitzacio', 'CIF', 'tipus_id', 'cp', 'idioma')
         
     def get_following(self, obj):
         user = self.context['request'].user

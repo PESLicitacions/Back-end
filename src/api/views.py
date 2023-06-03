@@ -534,7 +534,21 @@ class LicitacionsPrivadesUser(APIView):
         serializer = LicitacioPrivadaPreviewSerializer(licitacions, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    
+
+class LicitacionsPrivadesUserAplicants(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def get(self,request):
+        user = request.user
+        try:
+            licitacions = LicitacioPrivada.objects.filter(user = user).values_list('licitacio_ptr_id', flat=True)
+        except LicitacioPrivada.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        candidatures = Candidatura.objects.filter(licitacio_id__in=licitacions).order_by('licitacio')
+        serializer = CandidaturaSerializer(candidatures, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class Add_to_preferences(APIView):
     authentication_classes(IsAuthenticated,)

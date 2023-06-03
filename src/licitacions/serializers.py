@@ -1,15 +1,17 @@
 from rest_framework import serializers
 from licitacions import models
+from users.serializers import UserProfileSerializer
 from .models import ListaFavorits
 
 class LicitacioPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
     favorit = serializers.SerializerMethodField()
     notificacions = serializers.SerializerMethodField()
+    candidatura = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Licitacio
-        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'data_inici', 'data_fi', 'favorit', 'notificacions')
+        fields = ('id', 'lloc_execucio', 'pressupost', 'denominacio', 'tipus_contracte', 'data_inici', 'data_fi', 'favorit', 'notificacions', 'candidatura')
     
     def get_favorit(self, obj):
         user = self.context['request'].user
@@ -25,9 +27,19 @@ class LicitacioPreviewSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.is_authenticated:
             try:
-                models.ListaFavorits.objects.get(user=user, licitacio=obj, notificacions = True)
+                models.ListaFavorits.objects.get(user=user, licitacio=obj)
                 return True
             except models.ListaFavorits.DoesNotExist:
+                pass
+        return False
+    
+    def get_candidatura(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.Candidatura.objects.get(user=user, licitacio=obj)
+                return True
+            except models.Candidatura.DoesNotExist:
                 pass
         return False
 
@@ -60,6 +72,7 @@ class LicitacioPublicaPreviewSerializer(serializers.ModelSerializer):
             except models.ListaFavorits.DoesNotExist:
                 pass
         return False
+    
 
 
 
@@ -94,12 +107,14 @@ class LicitacioPublicaDetailsSerializer(serializers.ModelSerializer):
             except models.ListaFavorits.DoesNotExist:
                 pass
         return False
+
     
 
 
 class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
     favorit = serializers.SerializerMethodField()
     notificacions = serializers.SerializerMethodField()
+    candidatura = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPrivada
@@ -124,6 +139,15 @@ class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
             except models.ListaFavorits.DoesNotExist:
                 pass
         return False
+    def get_candidatura(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.Candidatura.objects.get(user=user, licitacio=obj)
+                return True
+            except models.Candidatura.DoesNotExist:
+                pass
+        return False
     
 
 
@@ -131,6 +155,7 @@ class LicitacioPrivadaPreviewSerializer(serializers.ModelSerializer):
 class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
     favorit = serializers.SerializerMethodField()
     notificacions = serializers.SerializerMethodField()
+    candidatura = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPrivada
@@ -156,6 +181,15 @@ class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
                 pass
         return False
     
+    def get_candidatura(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                models.Candidatura.objects.get(user=user, licitacio=obj)
+                return True
+            except models.Candidatura.DoesNotExist:
+                pass
+        return False
 
 
 class LocalitzacioInfoSerializer(serializers.ModelSerializer):
@@ -199,8 +233,7 @@ class ListaFavoritsSerializer(serializers.ModelSerializer):
 
 
 class CandidaturaSerializer(serializers.ModelSerializer):
-    favorit = serializers.SerializerMethodField()
-    notificacions = serializers.SerializerMethodField()
+    user = UserProfileSerializer()
 
     class Meta:
         model = models.Candidatura

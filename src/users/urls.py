@@ -8,9 +8,11 @@ router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
 
 urlpatterns = [
-    # Post, Put, Delete, Get of the Own profile
+    # Post, Put, Delete of the Own profile and Get of all the users
     path('', UserViewSet.as_view({ "get": "list", "post": "create", "put": "put", "delete": "delete"})),
-    path('<str:username>', UserDetail.as_view(), name='user-detail'),
+   
+    # Get of one user
+    path('<int:pk>', UserDetail.as_view(), name='user-detail'),
     
     # Get the token
     path('login/', obtain_auth_token),
@@ -18,18 +20,10 @@ urlpatterns = [
     # Get return preferences, Post create them, Put modifie them
     path('preferences', Add_to_preferences.as_view()),
     
-    
-    path('editProfile', edit_perfil, name='edit_profile'),
-    
-    path('delete/', delete_user),
-    
-    
-    # User details, if Get of own user, return full details
-    path('<int:pk>', UserDetailView.as_view()),
-    
     # Post Follow a user if not following else unfollow
-    path('<int:pk>/follow', FollowFunctionilities.as_view()),
-    # Get users Following
+    path('<int:pk>/follow', FollowView.as_view()),
+    # Get users following you
+
     path('following', ListFollowing.as_view()),
     # Get userse that follow you
     path('followers', ListFollowers.as_view()),
@@ -38,8 +32,9 @@ urlpatterns = [
     path('ratings/', RatingCreateView.as_view(), name='rating_create'),
     #Get the average rating of a user
     path('ratings/average/', RatingAverageView.as_view()),
+
     path('notifications/', NotificationsList.as_view()),    
-    
+
     
 
-] + router.urls
+]

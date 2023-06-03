@@ -61,7 +61,7 @@ class Licitacio(models.Model):
     data_publicacio_adjudicacio = models.DateTimeField(null=True)
     import_adjudicacio_sense_iva = models.DecimalField(decimal_places=2, max_digits=100, null=True)
     import_adjudicacio_amb_iva = models.DecimalField(decimal_places=2, max_digits=100, null=True)
-    ofertes_rebudes = models.IntegerField(null=True)
+    ofertes_rebudes = models.IntegerField(default=0, null=True)
     resultat = models.CharField(max_length=50, null=True)
     data_adjudicacio_contracte = models.DateField(null=True)
     data_formalitzacio_contracte = models.DateField(null=True)

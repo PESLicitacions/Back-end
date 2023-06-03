@@ -8,6 +8,7 @@ urlpatterns = [
     path('licitacions/public', LicitacionsPubliquesList.as_view()),
     path('licitacions/private', LicitacionsPrivadesList.as_view()),
     path('licitacions/private/my_licitacions', LicitacionsPrivadesUser.as_view()),
+    path('licitacions/private/my_licitacions/aplicants', LicitacionsPrivadesUserAplicants.as_view()),
     path('licitacions/favorites', LicitacionsFavoritesList.as_view()),
     path('licitacions/following', LicitacionsSeguidesList.as_view()),
     path('licitacions/preferences', LicitacionsPreferencesList.as_view()),

@@ -26,8 +26,7 @@ from users.models import *
 
 from django.db.models import Avg
 
-# Create your views here.
-
+# List all the users and register, delete and update the own user 
 class UserViewSet(viewsets.ModelViewSet):
     User = get_user_model()
     serializer_class = UserSerializer
@@ -52,11 +51,16 @@ class UserViewSet(viewsets.ModelViewSet):
     def put(self, request, format=None):
         user = request.user
         serializer = UserProfileEditSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        data_cif = json.dumps(request.data.get('CIF')).strip('"').strip()
+        print(data_cif)
+        if (len(data_cif) == 9 and not data_cif[0].isnumeric() and not data_cif[8].isnumeric() and data_cif[1:7].isnumeric()):
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)
+        
     
     @action(methods=['delete'], detail=False)
     def delete(self, request, format=None):
@@ -64,23 +68,16 @@ class UserViewSet(viewsets.ModelViewSet):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class UserDetail(APIView):
-    User = get_user_model()
+# List one user
+class UserDetail(generics.RetrieveAPIView):
+    queryset = CustomUser.objects.all()
     serializer_class = UserProfileSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsCreationOrIsAuthenticated,)
-    """
-    List all the users
-    """
-    def get(self, request, username, format=None):
-        user = get_object_or_404(User, username=username)
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data)
-    
-    
+    permission_classes = (IsAuthenticated,)
 
 
-class FollowFunctionilities(APIView):
+# Follow Users Views
+class FollowView(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
     
@@ -98,7 +95,6 @@ class FollowFunctionilities(APIView):
             response_data = {'following': following.email, 'user': follower.email, 'action': 'followed', 'success': True}
         return JsonResponse(response_data)
     
-
 class ListFollowing(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -110,7 +106,6 @@ class ListFollowing(generics.ListAPIView):
         User = get_user_model()
         return User.objects.filter(id__in=following)
     
-
 class ListFollowers(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -122,51 +117,7 @@ class ListFollowers(generics.ListAPIView):
         User = get_user_model()
         return User.objects.filter(id__in=followers)
 
-    
-@api_view(['PUT', 'GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
-def edit_perfil(request):
-    try:
-        perfil = CustomUser.objects.get(username = request.user.username)
-    except CustomUser.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    serializer = PerfilSerializer(perfil, data=request.data, partial= True)
-    if request.method == 'GET':
-        serializer = PerfilSerializer(perfil)
-        return Response(serializer.data)
-    if request.method == 'PUT':
-        data_cif = json.dumps(request.data.get('CIF')).strip('"').strip()
-        if (len(data_cif) == 9 and not data_cif[0].isnumeric() and not data_cif[8].isnumeric() and data_cif[1:7].isnumeric()):
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            else:
-                print(serializer.error_messages)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'error': 'El valor del nuevo CIF introducido es incorrecto'} , status=status.HTTP_400_BAD_REQUEST)
-
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
-def delete_user(request):
-    try:
-        user = request.user
-    except user.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'DELETE':
-        user.delete()
-        return Response({'success': True, 'message': 'Account deleted'})
-
-
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = UserPreviewSerializer
-    queryset = CustomUser.objects.all()
-   
-    
+# User Preferences View  
 class Add_to_preferences(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -273,7 +224,6 @@ class RatingCreateView(APIView):
         rating.save()
 
         return JsonResponse({'success': evaluating_user + 'ha valorado con un ' + value + ' a ' + evaluated_user})
-
 
 class RatingAverageView(APIView):
     authentication_classes(IsAuthenticated,)
