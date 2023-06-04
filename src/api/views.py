@@ -506,7 +506,47 @@ class Aply(APIView):
                     )
             return Response(NotificationSerializer(notification).data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_200_OK)
-      
+
+
+class AcceptAplicant(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def post(self,request):
+        user = request.user
+        candidatura_id = request.data.get('candidatura')
+        candidatura = get_object_or_404(Candidatura, pk=candidatura_id)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=candidatura.licitacio)
+
+        if user == licitacio.user:
+            candidatures = Candidatura.objects.filter(licitacio=licitacio)
+            candidatura.estat = 'Acceptada'
+            candidatura.save()
+            candidatures.exclude(id=candidatura_id).update(estat='Rebutjada')
+            return Response(status=status.HTTP_200_OK)
+
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class DeclineAplicant(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def post(self,request):
+        user = request.user
+        candidatura_id = request.data.get('candidatura')
+        candidatura = get_object_or_404(Candidatura, pk=candidatura_id)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=candidatura.licitacio)
+
+        if user == licitacio.user:
+            candidatura.estat = 'Rebutjada'
+            candidatura.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+
 class Estadistiques(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
