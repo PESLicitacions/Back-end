@@ -138,6 +138,7 @@ class Candidatura(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="candidatura", null=True, blank=True)
     licitacio = models.ForeignKey(LicitacioPrivada, on_delete=models.CASCADE, null=True, blank=True, related_name='candidatura')
     motiu = models.TextField(null=True)
+    estat = models.TextField(max_length=150, choices=choices.estat_candidatura, null=True, default='En procés')
     class Meta:
         constraints = [
             models.UniqueConstraint(
