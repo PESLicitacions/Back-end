@@ -92,6 +92,13 @@ class FollowView(APIView):
         else:
             follows = Follow(follower=follower, following=following)
             follows.save()
+            try:
+                Notification.objects.create(
+                    user = following,
+                    mesage = 'Nuevo Seguidor'
+                )
+            except:
+                return Response({"error":"Error al generar la notificacion"})
             response_data = {'following': following.email, 'user': follower.email, 'action': 'followed', 'success': True}
         return JsonResponse(response_data)
     
