@@ -256,3 +256,5 @@ class NotificationsList(APIView):
             notifications = Notification.objects.filter(user=request.user)
             NotificationSerializer(notifications, many = True)
             return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
