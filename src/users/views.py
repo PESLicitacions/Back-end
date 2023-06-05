@@ -252,6 +252,6 @@ class NotificationsList(APIView):
     permission_classes(TokenAuthentication,)
     
     def get(self, request):
-        notifications = Notification.objects.filter(user = self.request.user)
+        notifications = Notification.objects.filter(user = request.user)
         NotificationSerializer(notifications, many = True)
         return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)
