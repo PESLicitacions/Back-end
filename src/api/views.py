@@ -579,6 +579,7 @@ class Estadistiques(APIView):
         serializer = EstadistiquesSerializer(licitacio)
         return Response(serializer.data, status.HTTP_200_OK)
 
+
 class LicitacionsPrivadesUser(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
