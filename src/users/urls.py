@@ -33,7 +33,12 @@ urlpatterns = [
     #Get the average rating of a user
     path('ratings/average/', RatingAverageView.as_view()),
 
+    #Get athenticated user notifications
     path('notifications/', NotificationsList.as_view()),    
+
+    #Get users that start with prefix
+    path('search/', BuscarPorNombre.as_view()),    
+
 
     
 
