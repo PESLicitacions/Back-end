@@ -92,6 +92,13 @@ class FollowView(APIView):
         else:
             follows = Follow(follower=follower, following=following)
             follows.save()
+            try:
+                Notification.objects.create(
+                    user = following,
+                    mesage = 'Nuevo Seguidor'
+                )
+            except:
+                return Response({"error":"Error al generar la notificacion"})
             response_data = {'following': following.email, 'user': follower.email, 'action': 'followed', 'success': True}
         return JsonResponse(response_data)
     
@@ -245,6 +252,9 @@ class NotificationsList(APIView):
     permission_classes(TokenAuthentication,)
     
     def get(self, request):
-        notifications = Notification.objects.filter(user = self.request.user)
-        NotificationSerializer(notifications, many = True)
-        return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)
+        if request.user.is_authenticated:
+            notifications = Notification.objects.filter(user=request.user)
+            NotificationSerializer(notifications, many = True)
+            return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)

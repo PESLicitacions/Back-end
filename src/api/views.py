@@ -523,6 +523,15 @@ class AcceptAplicant(APIView):
             candidatura.estat = 'Acceptada'
             candidatura.save()
             candidatures.exclude(id=candidatura_id).update(estat='Rebutjada')
+            try:
+                Notification.objects.create(
+                    user = candidatura.user,
+                    mesage = 'Candidatura aceptada',
+                    licitacio = licitacio,
+                    nom_licitacio = licitacio.denominacio
+                )
+            except:
+                return Response({"error":"Error al generar la notificacion"})
             return Response(status=status.HTTP_200_OK)
 
         else:
@@ -542,6 +551,15 @@ class DeclineAplicant(APIView):
         if user == licitacio.user:
             candidatura.estat = 'Rebutjada'
             candidatura.save()
+            try:
+                Notification.objects.create(
+                    user = candidatura.user,
+                    mesage = 'Candidatura rechazada',
+                    licitacio = licitacio,
+                    nom_licitacio = licitacio.denominacio
+                )
+            except:
+                return Response({"error":"Error al generar la notificacion"})
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
