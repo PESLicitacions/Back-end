@@ -46,6 +46,15 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserProfileSerializer
         return UserSerializer
     
+    def get_queryset(self):
+        print('he entrado')
+        queryset = CustomUser.objects.all()
+
+        prefix = self.request.query_params.get('prefix')
+        if prefix is not None:
+            queryset = queryset.filter(lloc_execucio__nom__icontains=prefix)
+        return queryset
+
     
     @action(methods=['put'], detail=False)
     def put(self, request, format=None):
@@ -258,3 +267,16 @@ class NotificationsList(APIView):
             return Response(NotificationSerializer(notifications, many = True).data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
+
+class BuscarPorNombre(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def post(self, request):
+        try:
+            users = CustomUser.objects.filter(username__startswith=request.data.get("prefix"))
+        except User.DoesNotExist:
+            return Response({'error': 'No hay usuarios que comiencen por el prefijo'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(users, many = True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+# # UserSerializer
