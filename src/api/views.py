@@ -559,7 +559,7 @@ class Estadistiques(APIView):
             print("No existe")
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = EstadistiquesSerializer(licitacio)
-        return Response(serializer.data, status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, status.HTTP_200_OK)
 
 class LicitacionsPrivadesUser(APIView):
     authentication_classes(IsAuthenticated,)
