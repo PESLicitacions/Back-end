@@ -320,10 +320,19 @@ class LicitacionsPreferencesList(generics.ListAPIView):
         pressupost_preferences = PreferencePressupost.objects.filter(user=user).first()
         tl_preferences = PreferenceTipusLicitacio.objects.filter(user=user).first()
 
+        queryset = Licitacio.objects.none()
 
-        queryset = Licitacio.objects.filter(id__in=lic_pub_ids)
+        if tl_preferences:
+            if tl_preferences.privades:
+                ids_privades = LicitacioPrivada.objects.all().values_list('licitacio_ptr_id', flat=True)
+                queryset = queryset | Licitacio.objects.filter(id__in=ids_privades)
+            
+            if tl_preferences.publiques:
+                ids_publiques = LicitacioPublica.objects.all().values_list('licitacio_ptr_id', flat=True)
+                queryset = queryset | Licitacio.objects.filter(id__in=ids_publiques)
 
-        queryset = queryset | Licitacio.objects.filter(tipus_contracte__in=tp_preferences)
+        if tp_preferences:
+            queryset = queryset & Licitacio.objects.filter(tipus_contracte__in=tp_preferences)
 
 
         if pressupost_preferences:
@@ -334,16 +343,9 @@ class LicitacionsPreferencesList(generics.ListAPIView):
             elif pressupost_preferences.pressupost_min is not None and pressupost_preferences.pressupost_max is not None:
                 q = Q(pressupost__gte=pressupost_preferences.pressupost_min, pressupost__lte=pressupost_preferences.pressupost_max)
             
-            queryset = queryset | Licitacio.objects.filter(q)
-
-        if tl_preferences:
-            if tl_preferences.privades:
-                ids_privades = LicitacioPrivada.objects.all().values_list('licitacio_ptr_id', flat=True)
-                queryset = queryset | Licitacio.objects.filter(id__in=ids_privades)
-            
-            if tl_preferences.publiques:
-                ids_publiques = LicitacioPublica.objects.all().values_list('licitacio_ptr_id', flat=True)
-                queryset = queryset | Licitacio.objects.filter(id__in=ids_publiques)
+            queryset = queryset & Licitacio.objects.filter(q)
+        
+        queryset = queryset | Licitacio.objects.filter(id__in=lic_pub_ids)
 
         return queryset
 
