@@ -2,6 +2,7 @@ from rest_framework import serializers
 from licitacions import models
 from users.serializers import UserProfileSerializer
 from .models import ListaFavorits
+from users.models import CustomUser
 
 class LicitacioPreviewSerializer(serializers.ModelSerializer):
     tipus_contracte = serializers.StringRelatedField(many=False)
@@ -175,6 +176,7 @@ class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
     notificacions = serializers.SerializerMethodField()
     candidatura = serializers.SerializerMethodField()
     estat_candidatura = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LicitacioPrivada
@@ -221,6 +223,8 @@ class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
                 pass
         return "not aplied"
     
+    def get_username(self, obj):
+        return obj.user.username
 
 class LocalitzacioInfoSerializer(serializers.ModelSerializer):
     class Meta:
