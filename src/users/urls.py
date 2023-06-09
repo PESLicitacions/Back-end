@@ -11,7 +11,7 @@ urlpatterns = [
     # Post, Put, Delete of the Own profile and Get of all the users
     path('', UserViewSet.as_view({ "get": "list", "post": "create", "put": "put", "delete": "delete"})),
     
-    path('me', OwnUserView.as_view(), name='own-user')
+    path('me', OwnUserView.as_view(), name='own-user'),
    
     # Get of one user
     path('<int:pk>', UserDetail.as_view(), name='user-detail'),
@@ -40,8 +40,5 @@ urlpatterns = [
 
     #Get users that start with prefix
     path('search/', BuscarPorNombre.as_view()),    
-
-
-    
 
 ]
