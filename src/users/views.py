@@ -77,6 +77,15 @@ class UserViewSet(viewsets.ModelViewSet):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class OwnUserView(APIView):
+    #Autentificacion
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request, format=None):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
+
 # List one user
 class UserDetail(generics.RetrieveAPIView):
     queryset = CustomUser.objects.all()
