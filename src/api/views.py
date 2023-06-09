@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
-
+from publicdata.views import get_lloc_execucio
 from licitacions.models import *
 from users.models import *
 from users.serializers import NotificationSerializer
@@ -108,6 +108,12 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         # Check if the instance is LicitacioPrivada
         if isinstance(instance, LicitacioPrivada):
+            lloc_execucio = self.request.data.get('lloc_execucio')  # Assuming lloc_execucio is passed in the request data
+            print(lloc_execucio)
+            if lloc_execucio:
+                # Check if the lloc_execucio exists in the database or create it
+                localitzacio = get_lloc_execucio(lloc_execucio)
+                #serializer.validated_data['lloc_execucio'] = localitzacio
             # Check if the user is authenticated and the owner of the LicitacioPrivada
             if request.user.is_authenticated and request.user == instance.user:
                 return super().update(request, *args, **kwargs)
@@ -203,6 +209,12 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
         if self.request.method == 'GET':
             return LicitacioPrivadaPreviewSerializer
         elif self.request.method == 'POST':
+            lloc_execucio = self.request.data.get('lloc_execucio')  # Assuming lloc_execucio is passed in the request data
+            print(lloc_execucio)
+            if lloc_execucio:
+                # Check if the lloc_execucio exists in the database or create it
+                localitzacio = get_lloc_execucio(lloc_execucio)
+                #serializer.validated_data['lloc_execucio'] = localitzacio
             return LicitacioPrivadaDetailsSerializer
         else:
             # Return the default serializer class

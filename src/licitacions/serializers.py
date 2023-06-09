@@ -180,6 +180,7 @@ class LicitacioPrivadaDetailsSerializer(serializers.ModelSerializer):
         model = models.LicitacioPrivada
         fields = '__all__'
     
+    
     def get_favorit(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
