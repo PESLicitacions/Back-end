@@ -168,7 +168,14 @@ class Add_to_preferences(APIView):
         pressupost_min = request.query_params.get('pressupost_min')
         pressupost_max = request.query_params.get('pressupost_max')
         PreferencePressupost.objects.filter(user=user).delete()
-        if pressupost_min is not None or pressupost_max is not None:
+        if pressupost_min != "-1" or pressupost_max != "-1":
+            print("bk 1")
+            if pressupost_max == "-1":
+                print("bk 2")
+                pressupost_max = None
+            if pressupost_min == "-1":
+                print("bk 3")
+                pressupost_min = None
             preference_press = PreferencePressupost(user=user, pressupost_min=pressupost_min, pressupost_max=pressupost_max)
             try:
                 preference_press.save()

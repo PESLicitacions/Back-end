@@ -34,5 +34,5 @@ urlpatterns = [
   
     # Users URLs
     path("users/", include("users.urls")),
-    path('preferences', Add_to_preferences.as_view()),
+    #path('preferences', Add_to_preferences.as_view()),
 ]
