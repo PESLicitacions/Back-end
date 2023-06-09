@@ -22,6 +22,8 @@ class Notification(models.Model):
     mesage = models.CharField(max_length=150, choices=choices.notifications, null=True)
     licitacio = models.ForeignKey(Licitacio, on_delete=models.CASCADE, null=True, blank=True, related_name='licitacio_afectada')
     nom_licitacio = models.CharField(max_length=150, null=True)
+    username = models.CharField(max_length=150, null=True)
+
     
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password, **extra_fields):

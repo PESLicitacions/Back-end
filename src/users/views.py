@@ -113,7 +113,8 @@ class FollowView(APIView):
             try:
                 Notification.objects.create(
                     user = following,
-                    mesage = 'Nuevo Seguidor'
+                    mesage = 'Nuevo Seguidor',
+                    username = follower.username
                 )
             except:
                 return Response({"error":"Error al generar la notificacion"})
