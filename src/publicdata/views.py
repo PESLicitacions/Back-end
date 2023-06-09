@@ -414,9 +414,20 @@ def get_lloc_execucio(lloc_execucio):
         obj = Localitzacio.objects.get(nom=lloc_execucio)
         return obj
     except Localitzacio.DoesNotExist:
-        obj = Localitzacio(nom=lloc_execucio, longitud=Decimal(0.19), latitud=Decimal(0.1))
-        obj.save()
-        return obj
+        url = "https://us-central1-discovery-f510f.cloudfunctions.net/getCityCoordinates"
+        params = {"city": lloc_execucio}
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            longitude = data.get("longitude", 0.0)
+            latitude = data.get("latitude", 0.0)
+            obj = Localitzacio(nom=lloc_execucio, longitud=Decimal(longitude), latitud=Decimal(latitude))
+            obj.save()
+            return obj
+        else:
+            # Handle the case when the request fails or returns an error
+            # You can raise an exception or return a default value
+            return None
 
 def get_ambit(nom, codi):
     try:
