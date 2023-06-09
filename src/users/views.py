@@ -83,7 +83,7 @@ class OwnUserView(APIView):
     permission_classes = (IsAuthenticated,)
     
     def get(self, request, format=None):
-        serializer = UserProfileSerializer(request.user)
+        serializer = UserProfileEditSerializer(request.user)
         return Response(serializer.data)
 
 # List one user
