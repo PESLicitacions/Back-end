@@ -259,12 +259,13 @@ class RatingCreateView(APIView):
         return JsonResponse({'success': evaluating_user + 'ha valorado con un ' + value + ' a ' + evaluated_user})
     
     def get(self, request):
-        evaluating_user = request.POST.get('evaluating_user')
-        evaluated_user = request.POST.get('evaluated_user')
+        evaluating_user = request.GET.get('evaluating_user')
+        evaluated_user = request.GET.get('evaluated_user')
 
         try:
             rating = Rating.objects.get(
-                evaluating_user__email=evaluating_user, evaluated_user__email=evaluated_user
+                evaluating_user__email=evaluating_user,
+                evaluated_user__email=evaluated_user
             )
             value = rating.value
 
