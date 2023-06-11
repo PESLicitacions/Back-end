@@ -271,7 +271,7 @@ class RatingCreateView(APIView):
 
             return JsonResponse({'value': value})
         except Rating.DoesNotExist:
-            return JsonResponse({'value': None})
+            return JsonResponse({'value': 0})
 
 
 class RatingAverageView(APIView):
