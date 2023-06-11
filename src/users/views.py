@@ -279,7 +279,7 @@ class RatingAverageView(APIView):
     permission_classes(TokenAuthentication,)
     
     def get(self, request):
-        user_email = request.POST.get('evaluated_user')
+        user_email = request.GET.get('evaluated_user')
 
         user = get_object_or_404(CustomUser, email=user_email)
 
