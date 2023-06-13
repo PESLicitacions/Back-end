@@ -61,12 +61,14 @@ class Licitacio(models.Model):
     data_publicacio_adjudicacio = models.DateTimeField(null=True)
     import_adjudicacio_sense_iva = models.DecimalField(decimal_places=2, max_digits=100, null=True)
     import_adjudicacio_amb_iva = models.DecimalField(decimal_places=2, max_digits=100, null=True)
-    ofertes_rebudes = models.IntegerField(null=True)
+    ofertes_rebudes = models.IntegerField(default=0, null=True)
     resultat = models.CharField(max_length=50, null=True)
     data_adjudicacio_contracte = models.DateField(null=True)
     data_formalitzacio_contracte = models.DateField(null=True)
     lloc_execucio = models.ForeignKey(Localitzacio, to_field='nom', related_name="licitacio", null=True, on_delete=models.SET_NULL)
     tipus_contracte = models.ForeignKey(TipusContracte, to_field='id', related_name="licitacio", null=True, on_delete=models.SET_NULL)
+    visualitzacions = models.IntegerField(null=True)
+    num_favorits = models.IntegerField(null=True)
 
     def tipus_contracte_name(self):
         return TipusContracte.objects.filter(id=self.tipus_contracte).__str__
@@ -130,3 +132,16 @@ class PreferenceTipusLicitacio(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="preference_tipus_licitacio", primary_key=True)
     privades = models.BooleanField(default=False)
     publiques = models.BooleanField(default=False)
+
+
+class Candidatura(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="candidatura", null=True, blank=True)
+    licitacio = models.ForeignKey(LicitacioPrivada, on_delete=models.CASCADE, null=True, blank=True, related_name='candidatura')
+    motiu = models.TextField(null=True)
+    estat = models.TextField(max_length=150, choices=choices.estat_candidatura, null=True, default='En procés')
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'licitacio'], name='unique_candidatura'
+            )
+        ]

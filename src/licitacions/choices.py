@@ -26,3 +26,9 @@ fase_publicacio = (
     ('Anunci previ', 'Anunci previ'),
     ('Decisió de no subscriure un contracte', 'Decisió de no subscriure un contracte'),
 )
+
+estat_candidatura = {
+    ('Acceptada', 'Acceptada'),
+    ('En procés', 'En procés'),
+    ('Rebutjada', 'Rebutjada')
+}

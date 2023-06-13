@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import status
-from requests import Response
+from rest_framework import authentication, permissions, status
+from rest_framework.response import Response
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.pagination import LimitOffsetPagination
@@ -9,14 +9,24 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
 
 
+from publicdata.views import get_lloc_execucio
 from licitacions.models import *
 from users.models import *
+from users.serializers import NotificationSerializer
 from licitacions.serializers import *
 from users.models import CustomUser
+from users.serializers import UserSerializer, UserPreviewSerializer
+from publicdata.views import get_data
 
+class CronTests(generics.ListAPIView):
 
+    def get(self, request):
+           get_data()
+           return Response(status=status.HTTP_200_OK)
 
 
 class LicitacionsList(generics.ListAPIView):
@@ -60,9 +70,9 @@ class LicitacionsList(generics.ListAPIView):
         return queryset
 
 
-
 class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
+        print("QUERYSET")
         queryset = None
         pk = self.kwargs.get('pk')
         licitacio_publica = LicitacioPublica.objects.filter(pk=pk)
@@ -74,6 +84,16 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_serializer_class(self):
         obj = self.get_object()
+        pk = self.kwargs.get('pk')
+        try:
+            licitacio = Licitacio.objects.get(id = pk)
+            if(licitacio.visualitzacions is None):
+                licitacio.visualitzacions = 1
+            else:
+                licitacio.visualitzacions = licitacio.visualitzacions + 1
+            licitacio.save()
+        except Licitacio.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if isinstance(obj, LicitacioPublica):
             print("entered lic pub serializer")
             return LicitacioPublicaDetailsSerializer
@@ -82,6 +102,40 @@ class LicitacioDetailView(generics.RetrieveUpdateDestroyAPIView):
             return LicitacioPrivadaDetailsSerializer
         else:
             return self.serializer_class
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if the instance is LicitacioPrivada
+        if isinstance(instance, LicitacioPrivada):
+            lloc_execucio = self.request.data.get('lloc_execucio')  # Assuming lloc_execucio is passed in the request data
+            print(lloc_execucio)
+            if lloc_execucio:
+                # Check if the lloc_execucio exists in the database or create it
+                localitzacio = get_lloc_execucio(lloc_execucio)
+                #serializer.validated_data['lloc_execucio'] = localitzacio
+            # Check if the user is authenticated and the owner of the LicitacioPrivada
+            if request.user.is_authenticated and request.user == instance.user:
+                return super().update(request, *args, **kwargs)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if the instance is LicitacioPrivada
+        if isinstance(instance, LicitacioPrivada):
+            # Check if the user is authenticated and the owner of the LicitacioPrivada
+            if request.user.is_authenticated and request.user == instance.user:
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 class LicitacionsPubliquesList(generics.ListAPIView):
     serializer_class = LicitacioPublicaPreviewSerializer
@@ -141,7 +195,30 @@ class LicitacionsPubliquesList(generics.ListAPIView):
 
 
 class LicitacionsPrivadesList(generics.ListCreateAPIView):
-    serializer_class = LicitacioPrivadaPreviewSerializer
+    authentication_classes = [authentication.TokenAuthentication]  # Specify TokenAuthentication for authentication
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            # Require authentication for the POST method
+            return [permissions.IsAuthenticated()]
+        else:
+            # Allow unauthenticated access for the GET method
+            return []
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return LicitacioPrivadaPreviewSerializer
+        elif self.request.method == 'POST':
+            lloc_execucio = self.request.data.get('lloc_execucio')  # Assuming lloc_execucio is passed in the request data
+            print(lloc_execucio)
+            if lloc_execucio:
+                # Check if the lloc_execucio exists in the database or create it
+                localitzacio = get_lloc_execucio(lloc_execucio)
+                #serializer.validated_data['lloc_execucio'] = localitzacio
+            return LicitacioPrivadaDetailsSerializer
+        else:
+            # Return the default serializer class
+            return self.serializer_class
 
     def get_queryset(self):
         queryset = LicitacioPrivada.objects.all()
@@ -179,9 +256,24 @@ class LicitacionsPrivadesList(generics.ListCreateAPIView):
             queryset = queryset.filter(data_fi__lte=data_fi)
 
         return queryset
-   
     
+    def perform_create(self, serializer):
+        licitacio = serializer.save(user=self.request.user)
+        try:
+            followers = Follow.objects.filter(following = self.request.user)
+        except:
+            print('No tiene followers')
+        for f in followers:
+            Notification.objects.create(
+                            user = f.follower,
+                            licitacio = licitacio,
+                            mesage = 'Nueva publicación',
+                            nom_licitacio = licitacio.denominacio
+            )
+        return Response(status.HTTP_201_CREATED)
+            
 
+   
 class LicitacionsFavoritesList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
@@ -202,6 +294,18 @@ class LicitacionsSeguidesList(generics.ListAPIView):
         user = self.request.user
         seguint = ListaFavorits.objects.filter(user=user, notificacions = True).values_list('licitacio_id', flat=True)
         return Licitacio.objects.filter(id__in=seguint)
+
+
+class LicitacionsApliedList(generics.ListAPIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    serializer_class = LicitacioPreviewSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        seguint = Candidatura.objects.filter(user=user).values_list('licitacio_id', flat=True)
+        return Licitacio.objects.filter(id__in=seguint)
+
 
 class LicitacionsFollowingList(generics.ListAPIView):
     authentication_classes(IsAuthenticated,)
@@ -228,10 +332,19 @@ class LicitacionsPreferencesList(generics.ListAPIView):
         pressupost_preferences = PreferencePressupost.objects.filter(user=user).first()
         tl_preferences = PreferenceTipusLicitacio.objects.filter(user=user).first()
 
+        queryset = Licitacio.objects.none()
 
-        queryset = Licitacio.objects.filter(id__in=lic_pub_ids)
+        if tl_preferences:
+            if tl_preferences.privades:
+                ids_privades = LicitacioPrivada.objects.all().values_list('licitacio_ptr_id', flat=True)
+                queryset = queryset | Licitacio.objects.filter(id__in=ids_privades)
+            
+            if tl_preferences.publiques:
+                ids_publiques = LicitacioPublica.objects.all().values_list('licitacio_ptr_id', flat=True)
+                queryset = queryset | Licitacio.objects.filter(id__in=ids_publiques)
 
-        queryset = queryset | Licitacio.objects.filter(tipus_contracte__in=tp_preferences)
+        if tp_preferences:
+            queryset = queryset & Licitacio.objects.filter(tipus_contracte__in=tp_preferences)
 
 
         if pressupost_preferences:
@@ -242,16 +355,9 @@ class LicitacionsPreferencesList(generics.ListAPIView):
             elif pressupost_preferences.pressupost_min is not None and pressupost_preferences.pressupost_max is not None:
                 q = Q(pressupost__gte=pressupost_preferences.pressupost_min, pressupost__lte=pressupost_preferences.pressupost_max)
             
-            queryset = queryset | Licitacio.objects.filter(q)
-
-        if tl_preferences:
-            if tl_preferences.privades:
-                ids_privades = LicitacioPrivada.objects.all().values_list('licitacio_ptr_id', flat=True)
-                queryset = queryset | Licitacio.objects.filter(id__in=ids_privades)
-            
-            if tl_preferences.publiques:
-                ids_publiques = LicitacioPublica.objects.all().values_list('licitacio_ptr_id', flat=True)
-                queryset = queryset | Licitacio.objects.filter(id__in=ids_publiques)
+            queryset = queryset & Licitacio.objects.filter(q)
+        
+        queryset = queryset | Licitacio.objects.filter(id__in=lic_pub_ids)
 
         return queryset
 
@@ -320,16 +426,6 @@ class TipusContracteInfo(generics.ListAPIView):
             queryset = queryset.filter(Q(tipus_contracte__icontains=tipus_contracte) | Q(subtipus_contracte__icontains=tipus_contracte))
         return queryset
 
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    def get_queryset(self):
-        queryset = None
-        cif = self.kwargs.get('cif')
-        user = Perfil.objects.get(CIF = cif)
-        if user.exists():
-            queryset = LicitacioPublica.objects.all()
-        else:
-            queryset = LicitacioPrivada.objects.all()
-        return queryset
 
 class Add_to_favorites(APIView):
     authentication_classes(IsAuthenticated,)
@@ -340,13 +436,21 @@ class Add_to_favorites(APIView):
         licitacio = get_object_or_404(Licitacio, pk=pk)
         favorit = ListaFavorits.objects.filter(user=user, licitacio=licitacio).first()
         if favorit:
+            licitacio.num_favorits = licitacio.num_favorits - 1
+            licitacio.save()
             favorit.delete()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'deleted from favorites', 'success': True}
         else:
+            if(licitacio.num_favorits == None):
+                licitacio.num_favorits = 1
+            else:
+                licitacio.num_favorits = licitacio.num_favorits + 1
+            licitacio.save()
             favorit = ListaFavorits(user=user, licitacio=licitacio)
             favorit.save()
             response_data = {'licitacio': pk, 'user': user.email, 'action': 'added to favorites', 'success': True}
         return JsonResponse(response_data)
+
 
 class Seguir(APIView):
     authentication_classes(IsAuthenticated,)
@@ -370,83 +474,152 @@ class Seguir(APIView):
         
         return JsonResponse(response_data)
 
-class Add_to_preferences(APIView):
+
+
+class VisualitzarCandidatura(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+    
+    def get(self,request, pk):
+        try:
+            candidatura = Candidatura.objects.get(id = pk)
+            serializercand = CandidaturaSerializer(candidatura)
+        except Candidatura.DoesNotExist:
+            return Response({'error': 'La candidatura no existe'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializercand.data, status=status.HTTP_200_OK)
+
+
+class Aply(APIView):
     authentication_classes(IsAuthenticated,)
     permission_classes(TokenAuthentication,)
 
-    def post(self, request):
+    def post(self,request, pk):
         user = request.user
+        motiu = request.data.get('motiu')
+        print(motiu)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=pk)
+        print('peta')
+        aplied = Candidatura.objects.filter(user=user, licitacio=licitacio).first()
+        if aplied:
+            aplied.delete()
+            licitacio.ofertes_rebudes = licitacio.ofertes_rebudes - 1
+            licitacio.save()
+        else:
+            aplied = Candidatura(user=user, licitacio=licitacio, motiu=motiu)
+            aplied.save()
+            if(licitacio.ofertes_rebudes == None):
+                licitacio.ofertes_rebudes = 1     
+            else:
+                licitacio.ofertes_rebudes = licitacio.ofertes_rebudes + 1
+            licitacio.save()
+            notification = Notification.objects.create(
+                        user = licitacio.user,
+                        licitacio = licitacio,
+                        mesage = 'Usuario presentado',
+                        nom_licitacio = licitacio.denominacio
+                    )
+            return Response(NotificationSerializer(notification).data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK)
 
-        tipus_contracte_ids = request.query_params.get('tipus_contracte')
-        PreferenceTipusContracte.objects.filter(user=user).delete()
-        if tipus_contracte_ids is not None and tipus_contracte_ids != "":
-            tipus_contracte_ids = [int(id) for id in tipus_contracte_ids.split(',')]
-            for tipus_contracte_id in tipus_contracte_ids:
-                tipus_contracte = get_object_or_404(TipusContracte, id=tipus_contracte_id)
-                preference_tp = PreferenceTipusContracte(user=user, tipus_contracte=tipus_contracte)
-                try:
-                    preference_tp.save()
-                except:
-                    pass
 
-        ambit_ids = request.query_params.get('ambit')
-        PreferenceAmbit.objects.filter(user=user).delete()
-        if ambit_ids is not None and ambit_ids != "":
-            ambit_ids = [int(id) for id in ambit_ids.split(',')]
-            for ambit_id in ambit_ids:
-                ambit = get_object_or_404(Ambit, codi=ambit_id)
-                preference_amb = PreferenceAmbit(user=user, ambit=ambit)
-                try:
-                    preference_amb.save()
-                except:
-                    pass
-        
-        pressupost_min = request.query_params.get('pressupost_min')
-        pressupost_max = request.query_params.get('pressupost_max')
-        PreferencePressupost.objects.filter(user=user).delete()
-        if pressupost_min is not None or pressupost_max is not None:
-            preference_press = PreferencePressupost(user=user, pressupost_min=pressupost_min, pressupost_max=pressupost_max)
-            try:
-                preference_press.save()
-            except:
-                pass
-        
-        privades = request.query_params.get('privades')
-        print(privades)
-        publiques = request.query_params.get('publiques')
-        print(publiques)
-        PreferenceTipusLicitacio.objects.filter(user=user).delete()
-        if privades is not None or publiques is not None:
-            if privades is None:
-                privades = False
-            if publiques is None:
-                publiques = False
-            preference_tipus_lic = PreferenceTipusLicitacio(user=user, privades=privades, publiques=publiques)
-            try:
-                preference_tipus_lic.save()
-            except:
-                pass
+class AcceptAplicant(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
 
-        return JsonResponse({'status': 'ok'})
-    
-    def get(self, request):
+    def post(self,request):
         user = request.user
+        candidatura_id = request.data.get('candidatura')
+        candidatura = get_object_or_404(Candidatura, pk=candidatura_id)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=candidatura.licitacio)
 
-        tipus_contracte_preferences = PreferenceTipusContracte.objects.filter(user=user)
-        tipus_contracte_data = [{"id": p.tipus_contracte.id, "name": str(p.tipus_contracte)} for p in tipus_contracte_preferences]
+        if user == licitacio.user:
+            candidatures = Candidatura.objects.filter(licitacio=licitacio)
+            candidatura.estat = 'Acceptada'
+            candidatura.save()
+            candidatures.exclude(id=candidatura_id).update(estat='Rebutjada')
+            try:
+                Notification.objects.create(
+                    user = candidatura.user,
+                    mesage = 'Candidatura aceptada',
+                    licitacio = licitacio,
+                    nom_licitacio = licitacio.denominacio
+                )
+            except:
+                return Response({"error":"Error al generar la notificacion"})
+            return Response(status=status.HTTP_200_OK)
 
-        ambit_preferences = PreferenceAmbit.objects.filter(user=user)
-        ambit_data = [{"id": p.ambit.codi, "name": p.ambit.nom} for p in ambit_preferences]
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        pressupost_preference = PreferencePressupost.objects.filter(user=user).first()
-        pressupost_data = {"pressupost_min": pressupost_preference.pressupost_min if pressupost_preference else None,
-                           "pressupost_max": pressupost_preference.pressupost_max if pressupost_preference else None}
 
-        tipus_lic_preference = PreferenceTipusLicitacio.objects.filter(user=user).first()
-        tipus_lic_data = {"privades": tipus_lic_preference.privades if tipus_lic_preference else False,
-                          "publiques": tipus_lic_preference.publiques if tipus_lic_preference else False}
+class DeclineAplicant(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
 
-        return JsonResponse({"tipus_contracte": tipus_contracte_data,
-                             "ambit": ambit_data,
-                             "pressupost": pressupost_data,
-                             "tipus_licitacio": tipus_lic_data})
+    def post(self,request):
+        user = request.user
+        candidatura_id = request.data.get('candidatura')
+        candidatura = get_object_or_404(Candidatura, pk=candidatura_id)
+        licitacio = get_object_or_404(LicitacioPrivada, pk=candidatura.licitacio)
+
+        if user == licitacio.user:
+            candidatura.estat = 'Rebutjada'
+            candidatura.save()
+            try:
+                Notification.objects.create(
+                    user = candidatura.user,
+                    mesage = 'Candidatura rechazada',
+                    licitacio = licitacio,
+                    nom_licitacio = licitacio.denominacio
+                )
+            except:
+                return Response({"error":"Error al generar la notificacion"})
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class Estadistiques(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def get(self, request, pk):
+        print("HE ENTRADO")
+        try:
+            licitacio = Licitacio.objects.get(id = pk)
+        except Licitacio.DoesNotExist:
+            print("No existe")
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = EstadistiquesSerializer(licitacio)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+
+class LicitacionsPrivadesUser(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def get(self,request):
+        user = request.user
+        try:
+            licitacions = LicitacioPrivada.objects.filter(user = user)
+        except LicitacioPrivada.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = LicitacioPrivadaPreviewSerializer(licitacions, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LicitacionsPrivadesUserAplicants(APIView):
+    authentication_classes(IsAuthenticated,)
+    permission_classes(TokenAuthentication,)
+
+    def get(self,request):
+        user = request.user
+        try:
+            licitacions = LicitacioPrivada.objects.filter(user = user).values_list('licitacio_ptr_id', flat=True)
+        except LicitacioPrivada.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        candidatures = Candidatura.objects.filter(
+            Q(licitacio_id__in=licitacions) & Q(estat="En procés")
+        ).order_by('licitacio')
+        serializer = CandidaturaSerializer(candidatures, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

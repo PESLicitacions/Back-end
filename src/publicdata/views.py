@@ -1,17 +1,36 @@
 from django.shortcuts import render
 from django.db import transaction
 from django.http import JsonResponse
-from licitacions.models import Localitzacio, Ambit, Departament, Organ, TipusContracte, LicitacioPublica, LicitacioPrivada
+from licitacions.models import Localitzacio, Ambit, Departament, Organ, TipusContracte, LicitacioPublica, LicitacioPrivada, ListaFavorits
 from decimal import Decimal, getcontext
 import requests
 import json
 import csv
 from datetime import datetime, date
+from users.views import Notification
 
 
-def get_data(request):
+def test():
+# Objeto JSON de ejemplo
     PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit, codi_departament_ens, nom_departament_ens, codi_organ, nom_organ, tipus_contracte, subtipus_contracte'
-    num_rows = '500'
+    num_rows = '200000'
+    base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
+    response_API = requests.get(base_url)
+    data = response_API.text
+    parse_json = json.loads(data)
+
+    # Nombre del archivo .json
+    nombre_archivo = "/home/santi/Documents/PES/ejemplo.json"
+
+    # Crear el archivo .json y guardar el objeto JSON
+    with open(nombre_archivo, "w") as archivo:
+        json.dump(parse_json, archivo)
+
+    print(f"Archivo {nombre_archivo} creado exitosamente con el objeto JSON.")
+
+def get_data():
+    PARAMS = 'procediment, fase_publicacio, denominacio, objecte_contracte, pressupost_licitacio, valor_estimat_contracte, duracio_contracte, termini_presentacio_ofertes, data_publicacio_anunci, data_publicacio_adjudicacio, codi_cpv, import_adjudicacio_sense, import_adjudicacio_amb_iva, ofertes_rebudes, resultat, data_adjudicacio_contracte, data_formalitzacio_contracte, enllac_publicacio, lloc_execucio, codi_ambit, nom_ambit, codi_departament_ens, nom_departament_ens, codi_organ, nom_organ, tipus_contracte, subtipus_contracte'
+    num_rows = '1000'
     base_url = 'https://analisi.transparenciacatalunya.cat/resource/a23c-d6vp.json?$query=SELECT ' + PARAMS + ' LIMIT ' + num_rows
     response_API = requests.get(base_url)
     data = response_API.text
@@ -147,6 +166,17 @@ def get_data(request):
                 db_licitacio.data_inici = data_inici
                 db_licitacio.data_fi = data_fi
                 db_licitacio.save()
+
+                licitacioFollowed = (ListaFavorits.objects.filter(licitacio = db_licitacio))
+
+                for l in licitacioFollowed:
+                    if(l.notificacions):
+                        Notification.objects.create(
+                            user = l.user,
+                            licitacio = l.licitacio,
+                            mesage = 'Licitacion modificada',
+                            nom_licitacio = l.licitacio.denominacio
+                        )
 
             except LicitacioPublica.DoesNotExist:
                 LicitacioPublica.objects.create(procediment = procediment,
@@ -384,9 +414,20 @@ def get_lloc_execucio(lloc_execucio):
         obj = Localitzacio.objects.get(nom=lloc_execucio)
         return obj
     except Localitzacio.DoesNotExist:
-        obj = Localitzacio(nom=lloc_execucio, longitud=Decimal(0.19), latitud=Decimal(0.1))
-        obj.save()
-        return obj
+        url = "https://us-central1-discovery-f510f.cloudfunctions.net/getCityCoordinates"
+        params = {"city": lloc_execucio}
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            longitude = data.get("longitude", 0.0)
+            latitude = data.get("latitude", 0.0)
+            obj = Localitzacio(nom=lloc_execucio, longitud=Decimal(longitude), latitud=Decimal(latitude))
+            obj.save()
+            return obj
+        else:
+            # Handle the case when the request fails or returns an error
+            # You can raise an exception or return a default value
+            return None
 
 def get_ambit(nom, codi):
     try:
